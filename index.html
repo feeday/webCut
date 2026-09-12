@@ -6,12 +6,12 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>webCut V0.6.2</title>
-  <link rel="stylesheet" href="./style.css?v=062-20260912" />
+  <title>webCut V0.6.3</title>
+  <link rel="stylesheet" href="./style.css?v=063-20260912" />
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">webCut <small style="font-size:11px;font-weight:500;color:#84909c;margin-left:6px">V0.6.2</small></div>
+    <div class="brand">webCut <small style="font-size:11px;font-weight:500;color:#84909c;margin-left:6px">V0.6.3</small></div>
     <div class="top-actions">
       <button id="openVideoBtn">打开视频/音频</button>
       <button id="addVideoBtn">+ 视频</button>
@@ -62,7 +62,7 @@
       <div id="ruler" class="ruler"></div>
       <div class="track-row"><div class="track-header" style="width:116px"><strong>视频</strong></div><div id="videoLane" class="track-lane"></div></div>
       <div class="track-row"><div class="track-header" style="width:116px"><strong>原声音频</strong></div><div id="videoAudioLane" class="track-lane"></div></div>
-      <div class="track-row"><div class="track-header" style="width:116px"><strong>图像覆盖</strong></div><div id="imageLane" class="track-lane"></div></div>
+      <div class="track-row"><div class="track-header" style="width:116px"><strong>图像图层</strong></div><div id="imageLane" class="track-lane"></div></div>
       <div class="track-row"><div class="track-header" style="width:116px"><strong>外部音频</strong></div><div id="audioLane" class="track-lane"></div></div>
       <div class="track-row subtitle-row"><div class="track-header" style="width:116px"><strong>字幕</strong></div><div id="subtitleLane" class="track-lane"></div></div>
       <div id="playhead" class="playhead"></div>
@@ -90,8 +90,9 @@
   <input id="imageInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp" multiple hidden />
   <input id="audioInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg" multiple hidden />
 
-  <script src="./file-protocol-guard.js?v=062-20260912" defer></script>
-  <script>(()=>{const NativeWorker=window.Worker;if(!NativeWorker||location.protocol==='file:')return;window.Worker=class WebCutWorker extends NativeWorker{constructor(url,options){let target=url;try{const s=String(url);if(s.startsWith('blob:')&&options?.type==='module')target=new URL('./ffmpeg-worker.js?v=062-20260912',location.href).href;}catch{}super(target,options);}};})();</script>
-  <script src="./app-v062.js?v=062-20260912" defer></script>
+  <script src="./file-protocol-guard.js?v=063-20260912" defer></script>
+  <script>(()=>{const NativeWorker=window.Worker;if(!NativeWorker||location.protocol==='file:')return;window.Worker=class WebCutWorker extends NativeWorker{constructor(url,options){let target=url;try{const s=String(url);if(s.startsWith('blob:')&&options?.type==='module')target=new URL('./ffmpeg-worker.js?v=063-20260912',location.href).href;}catch{}super(target,options);}};})();</script>
+  <script src="./app-v062.js?v=063-20260912" defer></script>
+  <script src="./image-layers-v063.js?v=063-20260912" defer></script>
 </body>
 </html>
