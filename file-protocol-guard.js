@@ -12,7 +12,7 @@
       'border-radius:8px','padding:10px 12px','font-size:14px',
       'box-shadow:0 4px 16px #0002'
     ].join(';');
-    banner.innerHTML = '<b>当前是 file:// 直接打开模式。</b> 预览可以使用，但剪辑导出 / ASR 提取需要 Worker + WASM，浏览器会拦截。请双击项目里的 <b>启动-webCut.bat</b>，再从 <b>http://127.0.0.1:8080</b> 打开。媒体文件仍只在本机处理，不会上传到服务器。';
+    banner.innerHTML = '<b>当前是 file:// 直接打开模式。</b> 预览可以使用，但 FFmpeg Worker/WASM 导出会被浏览器限制。Windows 请运行 <b>启动-webCut.bat</b>，CentOS/Linux 请运行 <b>start-centos.sh</b>。本机默认地址：<b>http://127.0.0.1:18080/</b>。';
     document.body.appendChild(banner);
 
     const block = (id, statusId, message) => {
@@ -27,16 +27,8 @@
       }, true);
     };
 
-    block(
-      'runExportBtn',
-      'exportStatus',
-      '当前通过 file:// 直接打开，浏览器禁止 FFmpeg Worker/WASM 正常启动。请关闭本页，双击“启动-webCut.bat”，然后在 http://127.0.0.1:8080 使用。'
-    );
-
-    block(
-      'runAsrBtn',
-      'asrStatus',
-      '当前通过 file:// 直接打开。Qwen ASR 前需要浏览器本地 FFmpeg 提取 WAV，因此请双击“启动-webCut.bat”，然后在 http://127.0.0.1:8080 使用。'
-    );
+    const msg = '当前通过 file:// 直接打开。请先启动 webCut HTTP 服务，再从 http://127.0.0.1:18080/ 或服务器地址访问。';
+    block('runExportBtn', 'exportStatus', msg);
+    block('runAsrBtn', 'asrStatus', msg);
   });
 })();
