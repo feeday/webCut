@@ -11,6 +11,7 @@
     <div class="brand">webCut</div>
     <div class="top-actions">
       <button id="openVideoBtn">打开视频</button>
+      <button id="addVideoBtn">+ 视频</button>
       <button id="addImageBtn">+ 图像</button>
       <button id="addAudioBtn">+ 音频</button>
       <button id="asrBtn" class="accent">Qwen ASR</button>
@@ -21,8 +22,9 @@
   <main class="workspace">
     <section class="center-panel preview-panel">
       <div id="stage" class="preview-wrap stage">
-        <div id="audioOnlyPreview" class="audio-only-preview hidden">🎵 音频工程</div>
-        <div id="emptyPreview" class="empty-preview">打开一个主视频开始剪辑</div>
+        <video id="previewVideo" playsinline></video>
+        <div id="overlayLayer" class="overlay-layer"></div>
+        <div id="emptyPreview" class="empty-preview">打开视频开始剪辑</div>
       </div>
       <div class="transport">
         <button id="prevFrameBtn">◀ 帧</button>
@@ -44,7 +46,14 @@
         <div class="field grid2"><label>时间轴开始<input id="clipStart" type="number" step="0.01"></label><label>片段时长<input id="clipDuration" type="number" step="0.01"></label></div>
         <div class="field grid2"><label>素材入点<input id="clipIn" type="number" step="0.01"></label><label>素材出点<input id="clipOut" type="number" step="0.01"></label></div>
         <div class="field audio-only-field"><label>音量 %<input id="clipVolume" type="number" min="0" max="200" step="1"></label></div>
-        <div class="field visual-only"><label>不透明度 %<input id="clipOpacity" type="number" min="0" max="100" step="1"></label></div>
+        <div class="field visual-only hidden"><label>不透明度 %<input id="clipOpacity" type="number" min="0" max="100" step="1"></label></div>
+        <div id="imageFields" class="field hidden">
+          <div class="grid3">
+            <label>X %<input id="imageX" type="number" min="0" max="100" step="1"></label>
+            <label>Y %<input id="imageY" type="number" min="0" max="100" step="1"></label>
+            <label>尺寸 %<input id="imageScale" type="number" min="1" max="200" step="1"></label>
+          </div>
+        </div>
       </div>
       <div class="subtitle-actions"><button id="addSubtitleBtn">+ 字幕</button><button id="exportSrtBtn">导出 SRT</button></div>
     </aside>
@@ -56,9 +65,6 @@
       <button id="deleteClipBtn">删除片段</button>
       <button id="undoBtn">撤销</button>
       <span class="divider"></span>
-      <button id="addVisualTrackBtn">+ 视频/图像轨</button>
-      <button id="addAudioTrackBtn">+ 音频轨</button>
-      <span class="divider"></span>
       <button id="zoomOutBtn">−</button>
       <input id="zoomRange" class="zoom-range" type="range" min="20" max="240" value="90">
       <button id="zoomInBtn">＋</button>
@@ -69,7 +75,11 @@
     <div id="timeline" class="timeline">
       <div id="timelineInner" class="timeline-inner">
         <div id="ruler" class="ruler"></div>
-        <div id="tracksContainer"></div>
+        <div class="track-row"><div class="track-header" style="width:116px"><strong>视频</strong></div><div id="videoLane" class="track-lane"></div></div>
+        <div class="track-row"><div class="track-header" style="width:116px"><strong>原声音频</strong></div><div id="videoAudioLane" class="track-lane"></div></div>
+        <div class="track-row"><div class="track-header" style="width:116px"><strong>图像覆盖</strong></div><div id="imageLane" class="track-lane"></div></div>
+        <div class="track-row"><div class="track-header" style="width:116px"><strong>外部音频</strong></div><div id="audioLane" class="track-lane"></div></div>
+        <div class="track-row subtitle-row"><div class="track-header" style="width:116px"><strong>字幕</strong></div><div id="subtitleLane" class="track-lane"></div></div>
         <div id="playhead" class="playhead"></div>
       </div>
     </div>
@@ -99,12 +109,16 @@
       <div class="dialog-head"><h3>导出</h3><button value="cancel">×</button></div>
       <label>类型<select id="exportType"><option value="video">视频</option><option value="audio">仅音频</option></select></label>
       <label>格式<select id="exportFormat"><option value="original">保持原格式</option><option>mp4</option><option>webm</option><option>mp3</option><option>wav</option><option>flac</option><option>m4a</option></select></label>
+      <label>画布<select id="canvasPreset"><option value="source">首段视频尺寸</option><option value="1080p">1920×1080</option><option value="portrait">1080×1920</option><option value="custom">自定义</option></select></label>
+      <div class="grid2"><label>宽<input id="canvasWidth" type="number" value="1920"></label><label>高<input id="canvasHeight" type="number" value="1080"></label></div>
+      <label>画面适配<select id="fitMode"><option value="contain">完整显示（黑边）</option><option value="cover">铺满画布（裁切）</option></select></label>
       <div class="dialog-actions"><button type="button" id="runExportBtn" class="accent">开始导出</button></div>
       <pre id="exportStatus">等待操作</pre>
     </form>
   </dialog>
 
   <input id="mainVideoInput" type="file" accept="video/*,.mkv,.avi,.mov,.mp4,.webm,.m4v" hidden />
+  <input id="extraVideoInput" type="file" accept="video/*,.mkv,.avi,.mov,.mp4,.webm,.m4v" multiple hidden />
   <input id="imageInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp" multiple hidden />
   <input id="audioInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg" multiple hidden />
 
@@ -125,6 +139,6 @@
       };
     })();
   </script>
-  <script src="./app-v05.js" defer></script>
+  <script src="./app-v06.js" defer></script>
 </body>
 </html>
