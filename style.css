@@ -12,23 +12,28 @@ button:hover{background:#f2f5f8}.accent{background:#1e9bf0;color:#fff;border-col
 .panel,.center-panel{background:#fff;border:1px solid #dfe3e8;border-radius:10px;min-width:0;min-height:0;overflow:hidden}.panel{display:flex;flex-direction:column}.panel-title{font-weight:700;padding:14px;border-bottom:1px solid #edf0f3;flex:0 0 auto}
 .asset-toolbar,.subtitle-actions{display:flex;gap:8px;padding:10px;flex:0 0 auto}.asset-toolbar select{flex:1;min-width:0}.asset-list,.subtitle-list{overflow:auto;padding:8px;min-height:0}.asset-list{flex:1}.asset-list.empty,.subtitle-list.empty{color:#929aa4;text-align:center;padding-top:40px}.asset-item{display:flex;gap:8px;align-items:center;padding:8px;border-radius:8px;cursor:pointer;min-width:0}.asset-item:hover,.asset-item.active{background:#edf6fd}.asset-thumb{width:54px;height:38px;flex:0 0 54px;background:#111;border-radius:5px;object-fit:cover}.asset-meta{min-width:0;flex:1}.asset-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}.asset-cat{font-size:11px;color:#7b8490;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-.center-panel{display:grid;grid-template-rows:minmax(0,1fr) 56px}.preview-wrap{min-width:0;min-height:0;background:#0d0f12;display:flex;align-items:center;justify-content:center;border-radius:10px 10px 0 0;overflow:hidden;position:relative}.preview-wrap video{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;background:#000}.preview-wrap audio{width:85%;max-width:700px}.empty-preview{color:#9aa2ac}.transport{height:56px;min-width:0;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px;border-top:1px solid #e8ebef;overflow:hidden;white-space:nowrap}.transport input{width:68px}.media-info{font-size:12px;color:#7b8490;padding:4px 7px;background:#f3f5f7;border-radius:6px}.hidden{display:none!important}
+/* 预览区：视频元素本身始终按源视频真实宽高比缩放。
+   外层不再做黑色“固定画布”，所以横屏/竖屏都能完整显示，且不会出现大块假黑边。 */
+.center-panel{display:grid;grid-template-rows:minmax(0,1fr) 56px}
+.preview-wrap{min-width:0;min-height:0;background:#eef1f4;display:flex;align-items:center;justify-content:center;border-radius:10px 10px 0 0;overflow:hidden;position:relative;padding:8px}
+.preview-wrap video{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;background:#000;border-radius:4px;box-shadow:0 2px 10px #0002}
+.preview-wrap audio{width:85%;max-width:700px}.empty-preview{color:#9aa2ac}
+.transport{height:56px;min-width:0;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px;border-top:1px solid #e8ebef;overflow:hidden;white-space:nowrap}.transport input{width:68px}.media-info{font-size:12px;color:#7b8490;padding:4px 7px;background:#f3f5f7;border-radius:6px}.hidden{display:none!important}
 
-/* 横屏：预览优先占满宽度 */
-body.media-landscape .preview-wrap video{width:100%;height:100%;object-fit:contain}
+/* 横屏：中心列保持较宽，但画面本体仍按比例 contain，不强制拉满容器 */
+body.media-landscape .preview-wrap video{width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain}
 
-/* 竖屏：不再把 9:16 视频塞进一条超宽黑框。
-   中间预览列主动收窄，素材栏/属性栏略加宽，竖屏画面按高度尽量放大。 */
+/* 竖屏：中心列适当收窄，但预览本体按 9:16 / 实际比例完整显示 */
 body.media-portrait .workspace{grid-template-columns:minmax(300px,1fr) minmax(360px,28vw) minmax(330px,1fr)}
-body.media-portrait .preview-wrap{background:#15171a}
-body.media-portrait .preview-wrap video{height:100%;width:auto;max-width:100%;object-fit:contain}
+body.media-portrait .preview-wrap{background:#eef1f4}
+body.media-portrait .preview-wrap video{width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain}
 body.media-portrait .center-panel{max-width:560px;width:100%;justify-self:center}
 body.media-portrait .transport{gap:5px;font-size:12px}
 body.media-portrait .media-info{display:none}
 
-/* 方屏也不强行横向拉满 */
+/* 方屏同样只按原比例适配 */
 body.media-square .center-panel{max-width:760px;width:100%;justify-self:center}
-body.media-square .preview-wrap video{height:100%;width:auto}
+body.media-square .preview-wrap video{width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain}
 
 .inspector-panel{overflow:hidden}.inspector-panel>.field{flex:0 0 auto}.field{padding:10px 12px;border-bottom:1px solid #f0f2f5;min-width:0}.field label{display:block;font-size:12px;color:#727b86;margin-bottom:5px}.field>div{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.field input,.field select{width:100%;min-width:0;padding:7px;border:1px solid #cfd5dc;border-radius:7px}.field.inline{display:grid;grid-template-columns:46px minmax(0,1fr) 88px;gap:6px;align-items:center}.field.inline label{margin:0;white-space:nowrap}.field.inline input{width:100%;min-width:0}.field.inline button{width:88px;padding:7px 8px;white-space:nowrap}.subtitle-actions{border-bottom:1px solid #f0f2f5}.subtitle-list{flex:1}.subtitle-item{border:1px solid #dce2e8;border-radius:8px;padding:8px;margin-bottom:8px}.subtitle-item textarea{width:100%;min-height:56px;resize:vertical}.subtitle-time{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}.subtitle-time input{width:100%;min-width:0}
 
