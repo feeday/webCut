@@ -57,6 +57,7 @@ jobs:
             'image-controls-v064.js',
             'ffmpeg-worker.js',
             'file-protocol-guard.js',
+            'desktop-save.js',
             'server.py',
             '启动-webCut.bat',
             'start-centos.sh',
