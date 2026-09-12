@@ -10,34 +10,19 @@
   <header class="topbar">
     <div class="brand">webCut</div>
     <div class="top-actions">
-      <button id="openFilesBtn">打开文件</button>
-      <button id="openFolderBtn">打开文件夹</button>
+      <button id="openVideoBtn">打开视频</button>
+      <button id="addImageBtn">+ 图像</button>
+      <button id="addAudioBtn">+ 音频</button>
       <button id="asrBtn" class="accent">Qwen ASR</button>
       <button id="exportBtn" class="accent">导出</button>
     </div>
   </header>
 
   <main class="workspace">
-    <aside class="panel assets-panel">
-      <div class="panel-title">素材</div>
-      <div class="asset-toolbar two-row">
-        <select id="assetTypeFilter">
-          <option value="all">全部类型</option>
-          <option value="video">视频</option>
-          <option value="audio">音频</option>
-          <option value="image">图像</option>
-        </select>
-        <select id="categoryFilter"><option value="all">全部分类</option></select>
-        <button id="addCategoryBtn">+ 分类</button>
-      </div>
-      <div class="asset-tip">单击选择 · 双击或点 ＋ 加入时间轴</div>
-      <div id="assetList" class="asset-list empty">暂无素材</div>
-    </aside>
-
     <section class="center-panel preview-panel">
       <div id="stage" class="preview-wrap stage">
         <div id="audioOnlyPreview" class="audio-only-preview hidden">🎵 音频工程</div>
-        <div id="emptyPreview" class="empty-preview">打开本地视频 / 音频 / 图像</div>
+        <div id="emptyPreview" class="empty-preview">打开一个主视频开始剪辑</div>
       </div>
       <div class="transport">
         <button id="prevFrameBtn">◀ 帧</button>
@@ -52,10 +37,9 @@
 
     <aside class="panel inspector-panel">
       <div class="panel-title">属性 / 字幕</div>
-      <div id="inspectorEmpty" class="inspector-empty">选择素材或时间轴片段</div>
+      <div id="inspectorEmpty" class="inspector-empty">选择时间轴片段</div>
       <div id="inspectorContent" class="hidden inspector-content">
         <div class="field"><label>文件</label><div id="fileName">-</div></div>
-        <div class="field"><label>分类</label><select id="assetCategory"></select></div>
         <div class="field"><label>所在轨道</label><div id="clipTrack">-</div></div>
         <div class="field grid2"><label>时间轴开始<input id="clipStart" type="number" step="0.01"></label><label>片段时长<input id="clipDuration" type="number" step="0.01"></label></div>
         <div class="field grid2"><label>素材入点<input id="clipIn" type="number" step="0.01"></label><label>素材出点<input id="clipOut" type="number" step="0.01"></label></div>
@@ -120,8 +104,9 @@
     </form>
   </dialog>
 
-  <input id="fileInput" type="file" accept="video/*,audio/*,image/*,.mkv,.avi,.mov,.mp4,.webm,.m4v,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg,.jpg,.jpeg,.png,.webp,.gif,.bmp" multiple hidden />
-  <input id="folderInput" type="file" accept="video/*,audio/*,image/*,.mkv,.avi,.mov,.mp4,.webm,.m4v,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg,.jpg,.jpeg,.png,.webp,.gif,.bmp" webkitdirectory directory multiple hidden />
+  <input id="mainVideoInput" type="file" accept="video/*,.mkv,.avi,.mov,.mp4,.webm,.m4v" hidden />
+  <input id="imageInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp" multiple hidden />
+  <input id="audioInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg" multiple hidden />
 
   <script src="./file-protocol-guard.js" defer></script>
   <script>
@@ -140,7 +125,6 @@
       };
     })();
   </script>
-  <script src="./waveform-fix.js" defer></script>
-  <script src="./app-v04.js" defer></script>
+  <script src="./app-v05.js" defer></script>
 </body>
 </html>
