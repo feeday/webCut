@@ -1,37 +1,35 @@
 from __future__ import annotations
 
+import argparse
 import http.server
 import os
-import socket
 import socketserver
-import sys
 import threading
 import time
 import webbrowser
 from pathlib import Path
 
-HOST = "127.0.0.1"
-PORT = 18080
 ROOT = Path(__file__).resolve().parent
+DEFAULT_PORT = 18080
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
-    # Serve files from the repository directory regardless of the current shell path.
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
 
     def end_headers(self):
-        # Helpful MIME and isolation headers for modern browser APIs / wasm workers.
-        self.send_header("Cache-Control", "no-cache")
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
         super().end_headers()
 
 
-def port_is_free(host: str, port: int) -> bool:
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex((host, port)) != 0
+class Server(socketserver.ThreadingTCPServer):
+    allow_reuse_address = True
+    daemon_threads = True
 
 
-def open_browser_later(url: str):
+def open_browser_later(url: str) -> None:
     time.sleep(0.8)
     try:
         webbrowser.open(url, new=2)
@@ -39,40 +37,52 @@ def open_browser_later(url: str):
         pass
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="webCut static server")
+    parser.add_argument("--host", default=os.environ.get("HOST", "127.0.0.1"))
+    parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", DEFAULT_PORT)))
+    parser.add_argument("--no-browser", action="store_true", help="do not open a local browser")
+    return parser.parse_args()
+
+
 def main() -> int:
+    args = parse_args()
     os.chdir(ROOT)
 
-    if not port_is_free(HOST, PORT):
-        print(f"Port {PORT} is already in use.")
-        print(f"Try opening http://{HOST}:{PORT}/ in your browser first.")
-        print("If that page is not webCut, close the program using the port and run this again.")
-        input("Press Enter to close...")
-        return 2
+    public = args.host not in {"127.0.0.1", "localhost", "::1"}
+    local_url = f"http://127.0.0.1:{args.port}/"
+    display_url = f"http://{args.host}:{args.port}/"
 
-    url = f"http://{HOST}:{PORT}/"
-    print("=" * 46)
-    print("webCut local server")
-    print("=" * 46)
+    print("=" * 52)
+    print("webCut server")
+    print("=" * 52)
     print(f"Folder : {ROOT}")
-    print(f"Address: {url}")
+    print(f"Listen : {display_url}")
+    if public:
+        print(f"LAN/WAN: http://<server-ip>:{args.port}/")
+    else:
+        print(f"Open   : {local_url}")
     print()
-    print("Keep this window open while using webCut.")
-    print("Video/audio stays local in your browser.")
-    print("Press Ctrl+C to stop the server.")
+    print("The web server only serves HTML/CSS/JS.")
+    print("Media editing/export runs in the visitor's browser.")
+    print("Only Qwen ASR sends extracted audio to the configured ASR API.")
+    print("Press Ctrl+C to stop.")
     print()
-
-    threading.Thread(target=open_browser_later, args=(url,), daemon=True).start()
 
     try:
-        with socketserver.ThreadingTCPServer((HOST, PORT), Handler) as httpd:
-            httpd.daemon_threads = True
+        with Server((args.host, args.port), Handler) as httpd:
+            if not args.no_browser and not public:
+                threading.Thread(target=open_browser_later, args=(local_url,), daemon=True).start()
             httpd.serve_forever()
     except KeyboardInterrupt:
         print("\nwebCut server stopped.")
         return 0
+    except OSError as exc:
+        print(f"Server failed: {exc}")
+        print(f"Check whether port {args.port} is already in use or blocked by the firewall.")
+        return 2
     except Exception as exc:
-        print(f"\nServer failed: {exc}")
-        input("Press Enter to close...")
+        print(f"Server failed: {exc}")
         return 1
 
 
