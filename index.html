@@ -21,9 +21,7 @@
     <aside class="panel assets-panel">
       <div class="panel-title">素材</div>
       <div class="asset-toolbar">
-        <select id="categoryFilter">
-          <option value="all">全部分类</option>
-        </select>
+        <select id="categoryFilter"><option value="all">全部分类</option></select>
         <button id="addCategoryBtn">+ 分类</button>
       </div>
       <div id="assetList" class="asset-list empty">暂无素材</div>
@@ -51,21 +49,13 @@
       <div class="field"><label>分类</label><select id="assetCategory"><option value="未分类">未分类</option></select></div>
       <div class="field inline"><label>入点</label><input id="inPoint" value="0.000" /><button id="setInBtn">设为当前</button></div>
       <div class="field inline"><label>出点</label><input id="outPoint" value="0.000" /><button id="setOutBtn">设为当前</button></div>
-      <div class="subtitle-actions">
-        <button id="addSubtitleBtn">+ 字幕</button>
-        <button id="exportSrtBtn">导出 SRT</button>
-      </div>
+      <div class="subtitle-actions"><button id="addSubtitleBtn">+ 字幕</button><button id="exportSrtBtn">导出 SRT</button></div>
       <div id="subtitleList" class="subtitle-list empty">暂无字幕</div>
     </aside>
   </main>
 
   <section class="timeline-section">
-    <div class="editbar">
-      <button id="splitBtn">✂ 分割</button>
-      <button id="deleteClipBtn">删除片段</button>
-      <button id="undoBtn">撤销</button>
-      <span class="hint">I 入点 · O 出点 · S 分割 · Delete 删除 · ←/→逐帧</span>
-    </div>
+    <div class="editbar"><button id="splitBtn">✂ 分割</button><button id="deleteClipBtn">删除片段</button><button id="undoBtn">撤销</button><span class="hint">I 入点 · O 出点 · S 分割 · Delete 删除 · ←/→逐帧</span></div>
     <div id="timeline" class="timeline">
       <div id="ruler" class="ruler"></div>
       <div class="track-row"><span class="track-name">视频</span><div id="videoTrack" class="track"></div></div>
@@ -75,47 +65,14 @@
     </div>
   </section>
 
-  <dialog id="storyboardDialog">
-    <form method="dialog" class="dialog-box wide">
-      <div class="dialog-head"><h3>帧导览 / 故事板</h3><button value="cancel">×</button></div>
-      <div class="dialog-tools">
-        <label>每 <input id="storyInterval" type="number" value="1" min="0.1" step="0.1" /> 秒一帧</label>
-        <button type="button" id="generateStoryboardBtn">生成</button>
-      </div>
-      <div id="storyboardGrid" class="storyboard-grid"></div>
-    </form>
-  </dialog>
+  <dialog id="storyboardDialog"><form method="dialog" class="dialog-box wide"><div class="dialog-head"><h3>帧导览 / 故事板</h3><button value="cancel">×</button></div><div class="dialog-tools"><label>每 <input id="storyInterval" type="number" value="1" min="0.1" step="0.1" /> 秒一帧</label><button type="button" id="generateStoryboardBtn">生成</button></div><div id="storyboardGrid" class="storyboard-grid"></div></form></dialog>
 
-  <dialog id="asrDialog">
-    <form method="dialog" class="dialog-box">
-      <div class="dialog-head"><h3>Qwen ASR</h3><button value="cancel">×</button></div>
-      <label>API 地址<input id="asrUrl" placeholder="http://127.0.0.1:8000/asr" /></label>
-      <label>Bearer Token<input id="asrToken" placeholder="可留空" /></label>
-      <label>文件字段名<input id="asrField" value="file" /></label>
-      <div class="dialog-actions">
-        <button type="button" id="saveAsrConfigBtn">保存配置</button>
-        <button type="button" id="runAsrBtn" class="accent">开始识别</button>
-      </div>
-      <pre id="asrStatus">等待操作</pre>
-    </form>
-  </dialog>
+  <dialog id="asrDialog"><form method="dialog" class="dialog-box"><div class="dialog-head"><h3>Qwen ASR</h3><button value="cancel">×</button></div><label>API 地址<input id="asrUrl" placeholder="http://127.0.0.1:8000/asr" /></label><label>Bearer Token<input id="asrToken" placeholder="可留空" /></label><label>文件字段名<input id="asrField" value="file" /></label><div class="dialog-actions"><button type="button" id="saveAsrConfigBtn">保存配置</button><button type="button" id="runAsrBtn" class="accent">开始识别</button></div><pre id="asrStatus">等待操作</pre></form></dialog>
 
-  <dialog id="exportDialog">
-    <form method="dialog" class="dialog-box">
-      <div class="dialog-head"><h3>导出</h3><button value="cancel">×</button></div>
-      <label>类型<select id="exportType"><option value="video">视频</option><option value="audio">仅音频</option></select></label>
-      <label>格式<select id="exportFormat"><option value="original">保持原格式</option><option>mp4</option><option>webm</option><option>mp3</option><option>wav</option><option>flac</option><option>m4a</option></select></label>
-      <label><input id="burnSubs" type="checkbox" /> 烧录字幕（V0.1 暂未启用）</label>
-      <div class="dialog-actions"><button type="button" id="runExportBtn" class="accent">开始导出</button></div>
-      <pre id="exportStatus">等待操作</pre>
-    </form>
-  </dialog>
+  <dialog id="exportDialog"><form method="dialog" class="dialog-box"><div class="dialog-head"><h3>导出</h3><button value="cancel">×</button></div><label>类型<select id="exportType"><option value="video">视频</option><option value="audio">仅音频</option></select></label><label>格式<select id="exportFormat"><option value="original">保持原格式</option><option>mp4</option><option>webm</option><option>mp3</option><option>wav</option><option>flac</option><option>m4a</option></select></label><label><input id="burnSubs" type="checkbox" /> 烧录字幕（暂未启用）</label><div class="dialog-actions"><button type="button" id="runExportBtn" class="accent">开始导出</button></div><pre id="exportStatus">等待操作</pre></form></dialog>
 
-  <!-- 普通文件选择：任何正常浏览器环境都可用 -->
-  <input id="fileInput" type="file" accept="video/*,audio/*,.mkv,.avi,.mov,.mp4,.webm,.mp3,.wav,.m4a,.flac,.aac,.opus" multiple hidden />
-  <!-- 文件夹兼容选择：即使 showDirectoryPicker 因 HTTP/安全上下文不可用，也可以选目录 -->
-  <input id="folderInput" type="file" accept="video/*,audio/*,.mkv,.avi,.mov,.mp4,.webm,.mp3,.wav,.m4a,.flac,.aac,.opus" webkitdirectory directory multiple hidden />
-
-  <script src="./app.js" defer></script>
+  <input id="fileInput" type="file" accept="video/*,audio/*,.mkv,.avi,.mov,.mp4,.webm,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg" multiple hidden />
+  <input id="folderInput" type="file" accept="video/*,audio/*,.mkv,.avi,.mov,.mp4,.webm,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg" webkitdirectory directory multiple hidden />
+  <script src="./app-v02.js" defer></script>
 </body>
 </html>
