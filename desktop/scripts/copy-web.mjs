@@ -15,7 +15,8 @@ const files = [
   'image-layers-v063.js',
   'image-controls-v064.js',
   'ffmpeg-worker.js',
-  'file-protocol-guard.js'
+  'file-protocol-guard.js',
+  'desktop-save.js'
 ];
 
 await rm(outDir, { recursive: true, force: true });
