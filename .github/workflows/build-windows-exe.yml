@@ -15,10 +15,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
 
@@ -34,6 +34,11 @@ jobs:
         working-directory: desktop
         shell: pwsh
         run: npm install
+
+      - name: Generate Tauri icons
+        working-directory: desktop
+        shell: pwsh
+        run: npx tauri icon app-icon.svg
 
       - name: Build webCut EXE
         working-directory: desktop
