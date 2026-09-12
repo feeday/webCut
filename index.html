@@ -38,6 +38,7 @@
         <button id="playBtn">▶</button>
         <button id="nextFrameBtn">帧 ▶</button>
         <span id="timeText">00:00.000 / 00:00.000</span>
+        <span id="mediaInfo" class="media-info">未载入</span>
         <label>FPS <input id="fpsInput" type="number" value="30" min="1" max="240" /></label>
         <button id="storyboardBtn">故事板</button>
       </div>
@@ -74,5 +75,33 @@
   <input id="fileInput" type="file" accept="video/*,audio/*,.mkv,.avi,.mov,.mp4,.webm,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg" multiple hidden />
   <input id="folderInput" type="file" accept="video/*,audio/*,.mkv,.avi,.mov,.mp4,.webm,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg" webkitdirectory directory multiple hidden />
   <script src="./app-v02.js" defer></script>
+  <script>
+    // 根据媒体自身宽高比自动切换编辑布局，不影响 app-v02.js 的剪辑逻辑。
+    document.addEventListener('DOMContentLoaded', () => {
+      const video = document.getElementById('video');
+      const audio = document.getElementById('audio');
+      const info = document.getElementById('mediaInfo');
+      const classes = ['media-portrait','media-landscape','media-square','media-audio'];
+
+      function clearMediaMode(){ document.body.classList.remove(...classes); }
+
+      video.addEventListener('loadedmetadata', () => {
+        if(!video.videoWidth || !video.videoHeight) return;
+        clearMediaMode();
+        const ratio = video.videoWidth / video.videoHeight;
+        const mode = ratio < 0.86 ? 'media-portrait' : ratio > 1.16 ? 'media-landscape' : 'media-square';
+        document.body.classList.add(mode);
+        document.documentElement.style.setProperty('--media-ratio', `${video.videoWidth} / ${video.videoHeight}`);
+        const label = mode === 'media-portrait' ? '竖屏' : mode === 'media-landscape' ? '横屏' : '方屏';
+        info.textContent = `${label} ${video.videoWidth}×${video.videoHeight}`;
+      });
+
+      audio.addEventListener('loadedmetadata', () => {
+        clearMediaMode();
+        document.body.classList.add('media-audio');
+        info.textContent = '音频';
+      });
+    });
+  </script>
 </body>
 </html>
