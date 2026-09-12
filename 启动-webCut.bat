@@ -1,29 +1,99 @@
 @echo off
-chcp 65001 >nul
+setlocal EnableExtensions EnableDelayedExpansion
 cd /d "%~dp0"
+title webCut Local Server
 
+cls
 echo ==============================================
-echo webCut 本地启动器
+echo webCut local launcher
 echo ==============================================
 echo.
-echo 正在启动本地 HTTP 服务：http://127.0.0.1:8080
-echo 视频/音频仍然只在本机浏览器处理，不会上传。
+
+set "PYCMD="
+
+where py >nul 2>&1
+if not errorlevel 1 (
+    py -3 -c "import sys,http.server" >nul 2>&1
+    if not errorlevel 1 set "PYCMD=py -3"
+)
+
+if not defined PYCMD (
+    where python >nul 2>&1
+    if not errorlevel 1 (
+        python -c "import sys,http.server" >nul 2>&1
+        if not errorlevel 1 set "PYCMD=python"
+    )
+)
+
+if not defined PYCMD (
+    where python3 >nul 2>&1
+    if not errorlevel 1 (
+        python3 -c "import sys,http.server" >nul 2>&1
+        if not errorlevel 1 set "PYCMD=python3"
+    )
+)
+
+if not defined PYCMD goto :NO_PYTHON
+
+set "PORT="
+for /L %%P in (8080,1,8090) do (
+    if not defined PORT (
+        %PYCMD% -c "import socket,sys; s=socket.socket(); r=s.connect_ex(('127.0.0.1',%%P)); s.close(); sys.exit(0 if r!=0 else 1)" >nul 2>&1
+        if not errorlevel 1 set "PORT=%%P"
+    )
+)
+
+if not defined PORT goto :NO_PORT
+
+set "URL=http://127.0.0.1:%PORT%/"
+echo Python : %PYCMD%
+echo Address: %URL%
+echo.
+echo Keep this window open while using webCut.
+echo Video/audio files are still processed locally in your browser.
+echo Closing this window stops only the local page server.
 echo.
 
-where py >nul 2>nul
-if %errorlevel%==0 (
-    start "" "http://127.0.0.1:8080"
-    py -m http.server 8080 --bind 127.0.0.1
-    goto :eof
-)
+start "" powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep -Milliseconds 1200; Start-Process '%URL%'"
 
-where python >nul 2>nul
-if %errorlevel%==0 (
-    start "" "http://127.0.0.1:8080"
-    python -m http.server 8080 --bind 127.0.0.1
-    goto :eof
-)
+%PYCMD% -m http.server %PORT% --bind 127.0.0.1
+set "ERR=%ERRORLEVEL%"
 
-echo 未找到 Python。
-echo 请安装 Python 3，或使用任意本地 HTTP 静态服务器打开本目录。
+echo.
+echo ==============================================
+echo webCut server stopped. Error code: %ERR%
+echo ==============================================
+echo.
+echo If this was unexpected, copy the message above and send it to me.
 pause
+exit /b %ERR%
+
+:NO_PYTHON
+cls
+echo ==============================================
+echo webCut could not start
+necho ==============================================
+echo.
+echo Python 3 was not found or could not run.
+echo.
+echo Try this in Command Prompt:
+echo     python --version
+echo or:
+echo     py -3 --version
+echo.
+echo If both fail, install Python 3 and enable "Add Python to PATH".
+echo.
+pause
+exit /b 1
+
+:NO_PORT
+cls
+echo ==============================================
+echo webCut could not start
+necho ==============================================
+echo.
+echo Ports 8080 through 8090 are already in use.
+echo Close another local web server and try again.
+echo.
+pause
+exit /b 2
