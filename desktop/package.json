@@ -1,0 +1,14 @@
+{
+  "name": "webcut-desktop",
+  "private": true,
+  "version": "0.6.4",
+  "type": "module",
+  "scripts": {
+    "prepare:web": "node scripts/copy-web.mjs",
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}
