@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import errno
 import http.server
 import os
 import socketserver
@@ -42,7 +43,25 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--host", default=os.environ.get("HOST", "127.0.0.1"))
     parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", DEFAULT_PORT)))
     parser.add_argument("--no-browser", action="store_true", help="do not open a local browser")
+    parser.add_argument("--auto-port", action="store_true", help="try the next 10 ports if the requested port is busy")
     return parser.parse_args()
+
+
+def bind_server(host: str, port: int, auto_port: bool):
+    ports = range(port, port + 11) if auto_port else (port,)
+    last_error: OSError | None = None
+
+    for candidate in ports:
+        try:
+            return Server((host, candidate), Handler), candidate
+        except OSError as exc:
+            last_error = exc
+            if exc.errno not in {errno.EADDRINUSE, 10048}:
+                raise
+
+    if last_error is not None:
+        raise last_error
+    raise OSError("No available port")
 
 
 def main() -> int:
@@ -50,16 +69,29 @@ def main() -> int:
     os.chdir(ROOT)
 
     public = args.host not in {"127.0.0.1", "localhost", "::1"}
-    local_url = f"http://127.0.0.1:{args.port}/"
-    display_url = f"http://{args.host}:{args.port}/"
+
+    try:
+        httpd, actual_port = bind_server(args.host, args.port, args.auto_port)
+    except OSError as exc:
+        print(f"Server failed: {exc}")
+        if args.auto_port:
+            print(f"Ports {args.port}-{args.port + 10} are unavailable.")
+        else:
+            print(f"Check whether port {args.port} is already in use or blocked by the firewall.")
+        return 2
+
+    local_url = f"http://127.0.0.1:{actual_port}/"
+    display_url = f"http://{args.host}:{actual_port}/"
 
     print("=" * 52)
     print("webCut server")
     print("=" * 52)
     print(f"Folder : {ROOT}")
     print(f"Listen : {display_url}")
+    if actual_port != args.port:
+        print(f"Notice : port {args.port} was busy, switched to {actual_port}")
     if public:
-        print(f"LAN/WAN: http://<server-ip>:{args.port}/")
+        print(f"LAN/WAN: http://<server-ip>:{actual_port}/")
     else:
         print(f"Open   : {local_url}")
     print()
@@ -70,17 +102,13 @@ def main() -> int:
     print()
 
     try:
-        with Server((args.host, args.port), Handler) as httpd:
-            if not args.no_browser and not public:
-                threading.Thread(target=open_browser_later, args=(local_url,), daemon=True).start()
+        if not args.no_browser and not public:
+            threading.Thread(target=open_browser_later, args=(local_url,), daemon=True).start()
+        with httpd:
             httpd.serve_forever()
     except KeyboardInterrupt:
         print("\nwebCut server stopped.")
         return 0
-    except OSError as exc:
-        print(f"Server failed: {exc}")
-        print(f"Check whether port {args.port} is already in use or blocked by the firewall.")
-        return 2
     except Exception as exc:
         print(f"Server failed: {exc}")
         return 1
