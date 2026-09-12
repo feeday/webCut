@@ -1,7 +1,6 @@
 # webCut V0.6.4
 ![webCut 界面](https://raw.githubusercontent.com/feeday/webCut/main/2.png)
 
-
 轻量浏览器音视频剪辑器。网页服务器只负责提供 HTML / CSS / JS；视频、音频、图片的预览、剪辑和 FFmpeg.wasm 导出主要在访问者浏览器本地完成。只有使用 Qwen ASR 时，浏览器提取的 WAV 会发送到用户配置的 ASR API。
 
 ## 当前功能
@@ -20,28 +19,11 @@
 - 字幕与 SRT 导出
 - 浏览器本地 FFmpeg.wasm 导出
 - 多种画布尺寸与 contain / cover 适配
+- Windows 网页版 / CentOS 网页版 / Windows EXE 桌面版
 
-## 仓库结构
+## Windows 网页版
 
-```text
-index.html                 主页面
-style.css                  页面样式
-app-v062.js                当前核心编辑逻辑
-app-v064-loader.js         V0.6.4 启动与状态桥接
-image-layers-v063.js       多图片时间轴图层显示
-image-controls-v064.js     图片拖动 / 缩放 / 图层顺序控制
-ffmpeg-worker.js           FFmpeg Worker 入口
-file-protocol-guard.js     阻止 file:// 模式误用导出
-server.py                  Windows / Linux 通用静态服务器
-启动-webCut.bat            Windows 启动脚本
-start-centos.sh            CentOS / Linux 启动脚本
-```
-
-## Windows 启动
-
-需要 Python 3。
-
-直接双击：
+需要 Python 3，双击：
 
 ```text
 启动-webCut.bat
@@ -53,35 +35,10 @@ start-centos.sh            CentOS / Linux 启动脚本
 http://127.0.0.1:18080/
 ```
 
-也可以手动运行：
-
-```bat
-python server.py --host 127.0.0.1 --port 18080
-```
-
-## CentOS / Linux 启动
-
-先确认 Python 3：
-
-```bash
-python3 --version
-```
-
-如果没有：
-
-```bash
-sudo dnf install -y python3
-```
-
-首次给脚本执行权限：
+## CentOS / Linux 网页版
 
 ```bash
 chmod +x start-centos.sh
-```
-
-启动：
-
-```bash
 ./start-centos.sh
 ```
 
@@ -103,46 +60,105 @@ http://服务器IP:18080/
 PORT=8080 ./start-centos.sh
 ```
 
-只允许本机访问：
+## Windows EXE 桌面版
 
-```bash
-HOST=127.0.0.1 ./start-centos.sh
+桌面版使用 Tauri 封装当前网页界面，不影响网页版本。
+
+项目目录：
+
+```text
+desktop/
 ```
 
-如果 CentOS 防火墙开启，对局域网 / 公网提供服务时需要放行端口，例如：
+本地构建：
 
 ```bash
-sudo firewall-cmd --permanent --add-port=18080/tcp
-sudo firewall-cmd --reload
+cd desktop
+npm install
+npm run build
 ```
 
-> 若服务器直接暴露公网，建议用 Nginx/Caddy 反向代理并启用 HTTPS，而不是长期直接暴露 Python 静态服务器。
+生成的 Windows 安装程序位于：
+
+```text
+desktop/src-tauri/target/release/bundle/nsis/
+```
+
+> 当前 EXE 版仍使用 FFmpeg.wasm，因此主要优势是无需 Python / 浏览器启动脚本、使用体验更像原生软件。后续可将 FFmpeg.wasm 替换为原生 ffmpeg.exe 以进一步提升大视频导出性能。
+
+## GitHub 一键打包 EXE
+
+仓库已经包含：
+
+```text
+.github/workflows/build-windows-exe.yml
+```
+
+操作：
+
+1. 打开 GitHub 仓库的 `Actions`
+2. 左侧选择 `Build Windows EXE`
+3. 点击 `Run workflow`
+4. 选择 `main`
+5. 再点绿色 `Run workflow`
+6. 等待构建完成
+7. 打开这次 Workflow Run
+8. 在页面底部 `Artifacts` 下载 `webCut-windows`
+
+Artifact 内包含：
+
+```text
+webCut-windows-x64-setup.exe
+webCut-web.zip
+```
+
+如果推送版本 Tag，例如：
+
+```bash
+git tag v0.6.4
+git push origin v0.6.4
+```
+
+GitHub Actions 会自动构建，并把：
+
+```text
+webCut-windows-x64-setup.exe
+webCut-web.zip
+```
+
+自动上传到对应 GitHub Release。
+
+## 仓库结构
+
+```text
+index.html                 网页主页面
+style.css                  页面样式
+app-v062.js                核心编辑逻辑
+app-v064-loader.js         V0.6.4 启动与状态桥接
+image-layers-v063.js       多图片时间轴图层显示
+image-controls-v064.js     图片拖动 / 缩放 / 图层顺序控制
+ffmpeg-worker.js           FFmpeg Worker 入口
+file-protocol-guard.js     file:// 模式保护
+server.py                  Windows / Linux 静态服务器
+启动-webCut.bat            Windows 网页版启动脚本
+start-centos.sh            CentOS / Linux 启动脚本
+desktop/                   Tauri Windows 桌面版
+.github/workflows/         GitHub Actions 自动打包
+```
 
 ## Qwen ASR
 
-默认使用 `multipart/form-data`，字段名默认 `file`。可以在界面填写：
+默认使用 `multipart/form-data`，字段名默认 `file`。可配置：
 
 - API 地址
 - Bearer Token
 - 文件字段名
 
-常见返回格式：
-
-```json
-{
-  "text": "你好，这是测试。",
-  "segments": [
-    {"start": 0.0, "end": 1.2, "text": "你好"},
-    {"start": 1.2, "end": 2.8, "text": "这是测试"}
-  ]
-}
-```
-
 ASR 服务需允许网页跨域访问（CORS）。
 
 ## FFmpeg.wasm
 
-首次生成视频波形、导出或 ASR 音频处理时，会从公共 CDN 加载 FFmpeg.wasm 相关资源。因此第一次使用需要网络连接。
+首次生成视频波形、导出或 ASR 音频处理时，会从公共 CDN 加载 FFmpeg.wasm 相关资源，因此第一次使用需要网络连接。
 
 ## 快捷键
 
@@ -151,7 +167,3 @@ ASR 服务需允许网页跨域访问（CORS）。
 - `S`：播放头分割
 - `Delete`：删除选中片段
 - `Ctrl + 鼠标滚轮`：缩放时间轴
-
-## 注意
-
-不要直接双击 `index.html` 使用 `file://` 打开。浏览器会限制 Worker / WASM，导致 FFmpeg 导出失败。请使用 Windows 或 CentOS/Linux 启动脚本。
