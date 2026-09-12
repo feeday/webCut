@@ -1,44 +1,53 @@
 @echo off
-setlocal
-cd /d "%~dp0"
-title webCut launcher
+setlocal EnableExtensions
+title webCut Server
 
-set "PORT=18080"
-set "URL=http://127.0.0.1:%PORT%/"
+set "SCRIPT=%~dp0server.py"
 
 echo ==============================================
 echo webCut local launcher
 echo ==============================================
 echo.
-echo This script only starts Python's built-in HTTP server.
-echo No PowerShell, no downloads, no hidden process.
-echo.
+
+if not exist "%SCRIPT%" (
+    echo Cannot find server.py next to this BAT file.
+    echo Expected: %SCRIPT%
+    echo.
+    pause
+    exit /b 1
+)
 
 where py >nul 2>&1
-if not errorlevel 1 goto USE_PY
+if not errorlevel 1 (
+    echo Starting with: py -3 server.py
+    echo.
+    py -3 "%SCRIPT%"
+    set "ERR=%ERRORLEVEL%"
+    goto END
+)
 
 where python >nul 2>&1
-if not errorlevel 1 goto USE_PYTHON
+if not errorlevel 1 (
+    echo Starting with: python server.py
+    echo.
+    python "%SCRIPT%"
+    set "ERR=%ERRORLEVEL%"
+    goto END
+)
 
 echo Python 3 was not found.
 echo.
-echo Try in Command Prompt:
+echo Try:
 echo   py -3 --version
 echo   python --version
 echo.
 pause
 exit /b 1
 
-:USE_PY
-echo Starting webCut at %URL%
-start "webCut Server" cmd /k "cd /d ""%~dp0"" ^&^& py -3 -m http.server %PORT% --bind 127.0.0.1"
-timeout /t 1 /nobreak >nul
-start "" "%URL%"
-exit /b 0
-
-:USE_PYTHON
-echo Starting webCut at %URL%
-start "webCut Server" cmd /k "cd /d ""%~dp0"" ^&^& python -m http.server %PORT% --bind 127.0.0.1"
-timeout /t 1 /nobreak >nul
-start "" "%URL%"
-exit /b 0
+:END
+if not "%ERR%"=="0" (
+    echo.
+    echo server.py exited with error code %ERR%.
+    pause
+)
+exit /b %ERR%
