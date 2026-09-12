@@ -6,14 +6,14 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>webCut V0.6.1</title>
-  <link rel="stylesheet" href="./style.css?v=061-20260912" />
+  <title>webCut V0.6.2</title>
+  <link rel="stylesheet" href="./style.css?v=062-20260912" />
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">webCut <small style="font-size:11px;font-weight:500;color:#84909c;margin-left:6px">V0.6.1</small></div>
+    <div class="brand">webCut <small style="font-size:11px;font-weight:500;color:#84909c;margin-left:6px">V0.6.2</small></div>
     <div class="top-actions">
-      <button id="openVideoBtn">打开视频</button>
+      <button id="openVideoBtn">打开视频/音频</button>
       <button id="addVideoBtn">+ 视频</button>
       <button id="addImageBtn">+ 图像</button>
       <button id="addAudioBtn">+ 音频</button>
@@ -27,16 +27,12 @@
       <div id="stage" class="preview-wrap stage">
         <video id="previewVideo" playsinline></video>
         <div id="overlayLayer" class="overlay-layer"></div>
-        <div id="emptyPreview" class="empty-preview">打开视频开始剪辑</div>
+        <div id="emptyPreview" class="empty-preview">打开视频 / 音频开始剪辑</div>
       </div>
       <div class="transport">
-        <button id="prevFrameBtn">◀ 帧</button>
-        <button id="playBtn">▶</button>
-        <button id="nextFrameBtn">帧 ▶</button>
-        <span id="timeText">00:00.000 / 00:00.000</span>
-        <span id="mediaInfo" class="media-info">未载入</span>
-        <label>FPS <input id="fpsInput" type="number" value="30" min="1" max="240" /></label>
-        <button id="storyboardBtn">故事板</button>
+        <button id="prevFrameBtn">◀ 帧</button><button id="playBtn">▶</button><button id="nextFrameBtn">帧 ▶</button>
+        <span id="timeText">00:00.000 / 00:00.000</span><span id="mediaInfo" class="media-info">未载入</span>
+        <label>FPS <input id="fpsInput" type="number" value="30" min="1" max="240" /></label><button id="storyboardBtn">故事板</button>
       </div>
     </section>
 
@@ -50,13 +46,7 @@
         <div class="field grid2"><label>素材入点<input id="clipIn" type="number" step="0.01"></label><label>素材出点<input id="clipOut" type="number" step="0.01"></label></div>
         <div class="field audio-only-field"><label>音量 %<input id="clipVolume" type="number" min="0" max="200" step="1"></label></div>
         <div class="field visual-only hidden"><label>不透明度 %<input id="clipOpacity" type="number" min="0" max="100" step="1"></label></div>
-        <div id="imageFields" class="field hidden">
-          <div class="grid3">
-            <label>X %<input id="imageX" type="number" min="0" max="100" step="1"></label>
-            <label>Y %<input id="imageY" type="number" min="0" max="100" step="1"></label>
-            <label>尺寸 %<input id="imageScale" type="number" min="1" max="200" step="1"></label>
-          </div>
-        </div>
+        <div id="imageFields" class="field hidden"><div class="grid3"><label>X %<input id="imageX" type="number" min="0" max="100"></label><label>Y %<input id="imageY" type="number" min="0" max="100"></label><label>尺寸 %<input id="imageScale" type="number" min="1" max="200"></label></div></div>
       </div>
       <div class="subtitle-actions"><button id="addSubtitleBtn">+ 字幕</button><button id="exportSrtBtn">导出 SRT</button></div>
     </aside>
@@ -64,84 +54,44 @@
 
   <section class="timeline-section">
     <div class="editbar">
-      <button id="splitBtn">✂ 分割</button>
-      <button id="deleteClipBtn">删除片段</button>
-      <button id="undoBtn">撤销</button>
-      <span class="divider"></span>
-      <button id="zoomOutBtn">−</button>
-      <input id="zoomRange" class="zoom-range" type="range" min="20" max="240" value="90">
-      <button id="zoomInBtn">＋</button>
-      <button id="fitTimelineBtn">适合窗口</button>
-      <span id="zoomLabel" class="zoom-label">90px/s</span>
+      <button id="splitBtn">✂ 分割</button><button id="deleteClipBtn">删除片段</button><button id="undoBtn">撤销</button><span class="divider"></span>
+      <button id="zoomOutBtn">−</button><input id="zoomRange" class="zoom-range" type="range" min="20" max="240" value="90"><button id="zoomInBtn">＋</button><button id="fitTimelineBtn">适合窗口</button><span id="zoomLabel" class="zoom-label">90px/s</span>
       <span class="hint">Ctrl+滚轮缩放 · Space 播放 · S 分割 · Delete 删除 · ←/→逐帧</span>
     </div>
-    <div id="timeline" class="timeline">
-      <div id="timelineInner" class="timeline-inner">
-        <div id="ruler" class="ruler"></div>
-        <div class="track-row"><div class="track-header" style="width:116px"><strong>视频</strong></div><div id="videoLane" class="track-lane"></div></div>
-        <div class="track-row"><div class="track-header" style="width:116px"><strong>原声音频</strong></div><div id="videoAudioLane" class="track-lane"></div></div>
-        <div class="track-row"><div class="track-header" style="width:116px"><strong>图像覆盖</strong></div><div id="imageLane" class="track-lane"></div></div>
-        <div class="track-row"><div class="track-header" style="width:116px"><strong>外部音频</strong></div><div id="audioLane" class="track-lane"></div></div>
-        <div class="track-row subtitle-row"><div class="track-header" style="width:116px"><strong>字幕</strong></div><div id="subtitleLane" class="track-lane"></div></div>
-        <div id="playhead" class="playhead"></div>
-      </div>
-    </div>
+    <div id="timeline" class="timeline"><div id="timelineInner" class="timeline-inner">
+      <div id="ruler" class="ruler"></div>
+      <div class="track-row"><div class="track-header" style="width:116px"><strong>视频</strong></div><div id="videoLane" class="track-lane"></div></div>
+      <div class="track-row"><div class="track-header" style="width:116px"><strong>原声音频</strong></div><div id="videoAudioLane" class="track-lane"></div></div>
+      <div class="track-row"><div class="track-header" style="width:116px"><strong>图像覆盖</strong></div><div id="imageLane" class="track-lane"></div></div>
+      <div class="track-row"><div class="track-header" style="width:116px"><strong>外部音频</strong></div><div id="audioLane" class="track-lane"></div></div>
+      <div class="track-row subtitle-row"><div class="track-header" style="width:116px"><strong>字幕</strong></div><div id="subtitleLane" class="track-lane"></div></div>
+      <div id="playhead" class="playhead"></div>
+    </div></div>
   </section>
 
-  <dialog id="storyboardDialog">
-    <form method="dialog" class="dialog-box wide">
-      <div class="dialog-head"><h3>帧导览 / 故事板</h3><button value="cancel">×</button></div>
-      <div class="dialog-tools"><label>每 <input id="storyInterval" type="number" value="1" min="0.1" step="0.1" /> 秒一帧</label><button type="button" id="generateStoryboardBtn">生成</button></div>
-      <div id="storyboardGrid" class="storyboard-grid"></div>
-    </form>
-  </dialog>
+  <dialog id="storyboardDialog"><form method="dialog" class="dialog-box wide"><div class="dialog-head"><h3>帧导览 / 故事板</h3><button value="cancel">×</button></div><div class="dialog-tools"><label>每 <input id="storyInterval" type="number" value="1" min="0.1" step="0.1" /> 秒一帧</label><button type="button" id="generateStoryboardBtn">生成</button></div><div id="storyboardGrid" class="storyboard-grid"></div></form></dialog>
 
-  <dialog id="asrDialog">
-    <form method="dialog" class="dialog-box">
-      <div class="dialog-head"><h3>Qwen ASR</h3><button value="cancel">×</button></div>
-      <label>API 地址<input id="asrUrl" placeholder="http://127.0.0.1:8000/asr" /></label>
-      <label>Bearer Token<input id="asrToken" placeholder="可留空" /></label>
-      <label>文件字段名<input id="asrField" value="file" /></label>
-      <div class="dialog-actions"><button type="button" id="saveAsrConfigBtn">保存配置</button><button type="button" id="runAsrBtn" class="accent">开始识别</button></div>
-      <pre id="asrStatus">等待操作</pre>
-    </form>
-  </dialog>
+  <dialog id="asrDialog"><form method="dialog" class="dialog-box"><div class="dialog-head"><h3>Qwen ASR</h3><button value="cancel">×</button></div><label>API 地址<input id="asrUrl" placeholder="http://127.0.0.1:8000/asr" /></label><label>Bearer Token<input id="asrToken" placeholder="可留空" /></label><label>文件字段名<input id="asrField" value="file" /></label><div class="dialog-actions"><button type="button" id="saveAsrConfigBtn">保存配置</button><button type="button" id="runAsrBtn" class="accent">开始识别</button></div><pre id="asrStatus">等待操作</pre></form></dialog>
 
-  <dialog id="exportDialog">
-    <form method="dialog" class="dialog-box">
-      <div class="dialog-head"><h3>导出</h3><button value="cancel">×</button></div>
-      <label>类型<select id="exportType"><option value="video">视频</option><option value="audio">仅音频</option></select></label>
-      <label>格式<select id="exportFormat"><option value="original">保持原格式</option><option>mp4</option><option>webm</option><option>mp3</option><option>wav</option><option>flac</option><option>m4a</option></select></label>
+  <dialog id="exportDialog"><form method="dialog" class="dialog-box">
+    <div class="dialog-head"><h3>导出</h3><button value="cancel">×</button></div>
+    <label>类型<select id="exportType"><option value="video">视频</option><option value="audio">仅音频</option></select></label>
+    <label>格式<select id="exportFormat"><option value="original">保持原格式</option><option>mp4</option><option>webm</option><option>mp3</option><option>wav</option><option>flac</option><option>m4a</option></select></label>
+    <div id="exportVideoOptions">
       <label>画布<select id="canvasPreset"><option value="source">首段视频尺寸</option><option value="1080p">1920×1080</option><option value="portrait">1080×1920</option><option value="custom">自定义</option></select></label>
       <div class="grid2"><label>宽<input id="canvasWidth" type="number" value="1920"></label><label>高<input id="canvasHeight" type="number" value="1080"></label></div>
       <label>画面适配<select id="fitMode"><option value="contain">完整显示（黑边）</option><option value="cover">铺满画布（裁切）</option></select></label>
-      <div class="dialog-actions"><button type="button" id="runExportBtn" class="accent">开始导出</button></div>
-      <pre id="exportStatus">等待操作</pre>
-    </form>
-  </dialog>
+    </div>
+    <div class="dialog-actions"><button type="button" id="runExportBtn" class="accent">开始导出</button></div><pre id="exportStatus">等待操作</pre>
+  </form></dialog>
 
-  <input id="mainVideoInput" type="file" accept="video/*,.mkv,.avi,.mov,.mp4,.webm,.m4v" hidden />
+  <input id="mainVideoInput" type="file" accept="video/*,audio/*,.mkv,.avi,.mov,.mp4,.webm,.m4v,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg" hidden />
   <input id="extraVideoInput" type="file" accept="video/*,.mkv,.avi,.mov,.mp4,.webm,.m4v" multiple hidden />
   <input id="imageInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp" multiple hidden />
   <input id="audioInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg" multiple hidden />
 
-  <script src="./file-protocol-guard.js?v=061-20260912" defer></script>
-  <script>
-    (() => {
-      const NativeWorker = window.Worker;
-      if(!NativeWorker || location.protocol === 'file:') return;
-      window.Worker = class WebCutWorker extends NativeWorker {
-        constructor(url, options){
-          let target = url;
-          try {
-            const s = String(url);
-            if(s.startsWith('blob:') && options?.type === 'module') target = new URL('./ffmpeg-worker.js?v=061-20260912', location.href).href;
-          } catch {}
-          super(target, options);
-        }
-      };
-    })();
-  </script>
-  <script src="./app-v06.js?v=061-20260912" defer></script>
+  <script src="./file-protocol-guard.js?v=062-20260912" defer></script>
+  <script>(()=>{const NativeWorker=window.Worker;if(!NativeWorker||location.protocol==='file:')return;window.Worker=class WebCutWorker extends NativeWorker{constructor(url,options){let target=url;try{const s=String(url);if(s.startsWith('blob:')&&options?.type==='module')target=new URL('./ffmpeg-worker.js?v=062-20260912',location.href).href;}catch{}super(target,options);}};})();</script>
+  <script src="./app-v062.js?v=062-20260912" defer></script>
 </body>
 </html>
