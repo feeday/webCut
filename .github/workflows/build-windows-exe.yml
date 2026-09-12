@@ -1,0 +1,87 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: desktop/src-tauri
+
+      - name: Install desktop dependencies
+        working-directory: desktop
+        shell: pwsh
+        run: npm install
+
+      - name: Build webCut EXE
+        working-directory: desktop
+        shell: pwsh
+        run: npm run build
+
+      - name: Create web edition ZIP
+        shell: pwsh
+        run: |
+          $files = @(
+            'index.html',
+            'style.css',
+            'app-v062.js',
+            'app-v064-loader.js',
+            'image-layers-v063.js',
+            'image-controls-v064.js',
+            'ffmpeg-worker.js',
+            'file-protocol-guard.js',
+            'server.py',
+            '启动-webCut.bat',
+            'start-centos.sh',
+            'README.md'
+          )
+          Compress-Archive -Path $files -DestinationPath webCut-web.zip -Force
+
+      - name: Collect Windows installer
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          $exe = Get-ChildItem -Path 'desktop/src-tauri/target/release/bundle/nsis' -Filter '*.exe' | Select-Object -First 1
+          if (-not $exe) { throw 'NSIS installer EXE was not generated' }
+          Copy-Item $exe.FullName 'dist/webCut-windows-x64-setup.exe'
+          Copy-Item 'webCut-web.zip' 'dist/webCut-web.zip'
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: webCut-windows
+          path: dist/*
+          if-no-files-found: error
+
+      - name: Publish assets to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/webCut-windows-x64-setup.exe
+            dist/webCut-web.zip
+          generate_release_notes: true
