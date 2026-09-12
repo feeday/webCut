@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>webCut</title>
-  <link rel="stylesheet" href="./style.css" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>webCut V0.6.1</title>
+  <link rel="stylesheet" href="./style.css?v=061-20260912" />
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">webCut</div>
+    <div class="brand">webCut <small style="font-size:11px;font-weight:500;color:#84909c;margin-left:6px">V0.6.1</small></div>
     <div class="top-actions">
       <button id="openVideoBtn">打开视频</button>
       <button id="addVideoBtn">+ 视频</button>
@@ -122,7 +125,7 @@
   <input id="imageInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp" multiple hidden />
   <input id="audioInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg" multiple hidden />
 
-  <script src="./file-protocol-guard.js" defer></script>
+  <script src="./file-protocol-guard.js?v=061-20260912" defer></script>
   <script>
     (() => {
       const NativeWorker = window.Worker;
@@ -132,13 +135,13 @@
           let target = url;
           try {
             const s = String(url);
-            if(s.startsWith('blob:') && options?.type === 'module') target = new URL('./ffmpeg-worker.js', location.href).href;
+            if(s.startsWith('blob:') && options?.type === 'module') target = new URL('./ffmpeg-worker.js?v=061-20260912', location.href).href;
           } catch {}
           super(target, options);
         }
       };
     })();
   </script>
-  <script src="./app-v06.js" defer></script>
+  <script src="./app-v06.js?v=061-20260912" defer></script>
 </body>
 </html>
