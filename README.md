@@ -1,4 +1,6 @@
 # webCut V0.6.4
+![webCut 界面](https://raw.githubusercontent.com/feeday/webCut/main/2.png)
+
 
 轻量浏览器音视频剪辑器。网页服务器只负责提供 HTML / CSS / JS；视频、音频、图片的预览、剪辑和 FFmpeg.wasm 导出主要在访问者浏览器本地完成。只有使用 Qwen ASR 时，浏览器提取的 WAV 会发送到用户配置的 ASR API。
 
