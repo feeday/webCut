@@ -75,6 +75,26 @@
   <input id="fileInput" type="file" accept="video/*,audio/*,.mkv,.avi,.mov,.mp4,.webm,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg" multiple hidden />
   <input id="folderInput" type="file" accept="video/*,audio/*,.mkv,.avi,.mov,.mp4,.webm,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg" webkitdirectory directory multiple hidden />
 
+  <script>
+    // @ffmpeg/ffmpeg 在 CDN 动态 import 时会尝试创建跨域 Worker。
+    // 这里把该 Worker 入口重定向到当前站点的 ffmpeg-worker.js，避免卡在 load()。
+    (() => {
+      const NativeWorker = window.Worker;
+      if(!NativeWorker) return;
+      window.Worker = class WebCutWorker extends NativeWorker {
+        constructor(url, options){
+          let target = url;
+          try {
+            const s = String(url);
+            if(s.startsWith('blob:') && options?.type === 'module') {
+              target = new URL('./ffmpeg-worker.js', location.href).href;
+            }
+          } catch {}
+          super(target, options);
+        }
+      };
+    })();
+  </script>
   <script src="./app-v03.js" defer></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
