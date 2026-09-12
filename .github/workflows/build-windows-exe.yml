@@ -64,13 +64,19 @@ jobs:
           )
           Compress-Archive -Path $files -DestinationPath webCut-web.zip -Force
 
-      - name: Collect Windows installer
+      - name: Collect Windows builds
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          $exe = Get-ChildItem -Path 'desktop/src-tauri/target/release/bundle/nsis' -Filter '*.exe' | Select-Object -First 1
-          if (-not $exe) { throw 'NSIS installer EXE was not generated' }
-          Copy-Item $exe.FullName 'dist/webCut-windows-x64-setup.exe'
+
+          $portable = 'desktop/src-tauri/target/release/webcut.exe'
+          if (-not (Test-Path $portable)) { throw 'Portable webcut.exe was not generated' }
+          Copy-Item $portable 'dist/webCut-windows-x64-portable.exe'
+
+          $installer = Get-ChildItem -Path 'desktop/src-tauri/target/release/bundle/nsis' -Filter '*.exe' | Select-Object -First 1
+          if (-not $installer) { throw 'NSIS installer EXE was not generated' }
+          Copy-Item $installer.FullName 'dist/webCut-windows-x64-setup.exe'
+
           Copy-Item 'webCut-web.zip' 'dist/webCut-web.zip'
 
       - name: Upload build artifacts
@@ -85,6 +91,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
+            dist/webCut-windows-x64-portable.exe
             dist/webCut-windows-x64-setup.exe
             dist/webCut-web.zip
           generate_release_notes: true
