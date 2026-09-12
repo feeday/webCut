@@ -69,6 +69,10 @@
     </div></div>
   </section>
 
+  <div style="padding:8px 14px 12px;text-align:right;font-size:12px;color:#7b8794">
+    源代码：<a href="https://github.com/feeday/webCut" target="_blank" rel="noopener noreferrer">https://github.com/feeday/webCut</a>
+  </div>
+
   <dialog id="storyboardDialog"><form method="dialog" class="dialog-box wide"><div class="dialog-head"><h3>帧导览 / 故事板</h3><button value="cancel">×</button></div><div class="dialog-tools"><label>每 <input id="storyInterval" type="number" value="1" min="0.1" step="0.1" /> 秒一帧</label><button type="button" id="generateStoryboardBtn">生成</button></div><div id="storyboardGrid" class="storyboard-grid"></div></form></dialog>
 
   <dialog id="asrDialog"><form method="dialog" class="dialog-box"><div class="dialog-head"><h3>Qwen ASR</h3><button value="cancel">×</button></div><label>API 地址<input id="asrUrl" placeholder="http://127.0.0.1:8000/asr" /></label><label>Bearer Token<input id="asrToken" placeholder="可留空" /></label><label>文件字段名<input id="asrField" value="file" /></label><div class="dialog-actions"><button type="button" id="saveAsrConfigBtn">保存配置</button><button type="button" id="runAsrBtn" class="accent">开始识别</button></div><pre id="asrStatus">等待操作</pre></form></dialog>
@@ -91,6 +95,7 @@
   <input id="audioInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg" multiple hidden />
 
   <script src="./file-protocol-guard.js?v=064-20260912" defer></script>
+  <script src="./desktop-save.js?v=064-20260912" defer></script>
   <script>(()=>{const NativeWorker=window.Worker;if(!NativeWorker||location.protocol==='file:')return;window.Worker=class WebCutWorker extends NativeWorker{constructor(url,options){let target=url;try{const s=String(url);if(s.startsWith('blob:')&&options?.type==='module')target=new URL('./ffmpeg-worker.js?v=064-20260912',location.href).href;}catch{}super(target,options);}};})();</script>
   <script src="./app-v064-loader.js?v=064-20260912" defer></script>
   <script src="./image-layers-v063.js?v=064-20260912" defer></script>
