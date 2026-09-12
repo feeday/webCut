@@ -111,7 +111,11 @@
     </form>
   </dialog>
 
-  <input id="fileInput" type="file" accept="video/*,audio/*" multiple hidden />
-  <script type="module" src="./app.js"></script>
+  <!-- 普通文件选择：任何正常浏览器环境都可用 -->
+  <input id="fileInput" type="file" accept="video/*,audio/*,.mkv,.avi,.mov,.mp4,.webm,.mp3,.wav,.m4a,.flac,.aac,.opus" multiple hidden />
+  <!-- 文件夹兼容选择：即使 showDirectoryPicker 因 HTTP/安全上下文不可用，也可以选目录 -->
+  <input id="folderInput" type="file" accept="video/*,audio/*,.mkv,.avi,.mov,.mp4,.webm,.mp3,.wav,.m4a,.flac,.aac,.opus" webkitdirectory directory multiple hidden />
+
+  <script src="./app.js" defer></script>
 </body>
 </html>
