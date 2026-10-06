@@ -12,6 +12,7 @@ const files = [
   'audio.html',
   'audio.css',
   'audio-dsp.js',
+  'audio-export.js',
   'audio-viz.js',
   'audio-asr.js',
   'audio-asr-core.js',

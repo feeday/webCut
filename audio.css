@@ -5,3 +5,8 @@ body{background:#080b10;color:#dce6f6}header{background:#161c24;border-color:#2a
 @media(max-width:1150px){.layout{grid-template-columns:1fr}aside{position:static;grid-row:auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center}aside h2,aside .note{grid-column:1 / -1}}
 @media(max-width:780px){.charts{grid-template-columns:1fr 1fr}.vertical-card{grid-column:1 / -1;grid-row:4}.vertical-card canvas{height:300px}.charts .graph-note{grid-column:1 / -1}.wave-card,.linear-card{grid-column:1}.log-card,.horizontal-card{grid-column:2}aside{grid-template-columns:1fr 1fr}.cue-row{grid-template-columns:1fr}h2 small{display:block;margin:4px 0}.toolbar{gap:6px}}
 @media(max-width:520px){.charts{grid-template-columns:1fr}.charts article{grid-column:auto;grid-row:auto}.charts .playbar{grid-row:1}.playbar label{margin:0}.analysis-controls label{flex:1}header{gap:8px}}
+
+/* One spectrogram; seven distinct analysis views. */
+.charts .vertical-card{grid-row:2 / span 2}.charts .wave-card{grid-column:1 / span 2;grid-row:2}.charts .log-card{grid-column:1;grid-row:3}.charts .linear-card{grid-column:2;grid-row:3}aside [hidden]{display:none!important}
+@media(max-width:780px){.charts .wave-card{grid-column:1 / -1;grid-row:2}.charts .log-card{grid-column:1;grid-row:3}.charts .linear-card{grid-column:2;grid-row:3}.charts .vertical-card{grid-column:1 / -1;grid-row:4}}
+@media(max-width:520px){.charts .wave-card,.charts .log-card,.charts .linear-card,.charts .vertical-card{grid-column:auto;grid-row:auto}}
