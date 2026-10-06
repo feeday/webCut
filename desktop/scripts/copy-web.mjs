@@ -12,6 +12,8 @@ const files = [
   'style.css',
   'app-v062.js',
   'app-v064-loader.js',
+  'crop-tools.js',
+  'video-crop.js',
   'qwen-transport.js',
   'subtitle-tools.js',
   'subtitles.js',

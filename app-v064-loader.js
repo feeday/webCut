@@ -3,7 +3,7 @@
 
   async function boot() {
     try {
-      const res = await fetch('./app-v062.js?v=064-asr-20261006', { cache: 'no-store' });
+      const res = await fetch('./app-v062.js?v=064-crop-20261006', { cache: 'no-store' });
       if (!res.ok) throw new Error(`app-v062.js ${res.status}`);
       let src = await res.text();
 

@@ -21,3 +21,16 @@ dialog{border:none;border-radius:12px;padding:0;box-shadow:0 25px 70px #0003;max
 .dialog-box [hidden]{display:none!important}
 #asrDialog,#subtitleEditDialog{max-height:90vh;overflow:auto}
 #asrStatus{white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* Video source crop: source coordinates are independent of viewport size. */
+#cropDialog{width:min(940px,96vw);max-height:94vh;overflow:auto}
+#cropSurface{position:relative;margin:12px auto;overflow:hidden;touch-action:none;cursor:crosshair;background:#111;max-width:100%}
+#cropCanvas{display:block;width:100%;height:100%;pointer-events:none}
+#cropBox{position:absolute;box-sizing:border-box;border:2px solid #39e6bd;box-shadow:0 0 0 2000px #0009;cursor:move;touch-action:none}
+#cropBox i{position:absolute;width:14px;height:14px;background:#fff;border:2px solid #087d68;box-sizing:border-box;border-radius:2px}
+#cropBox [data-corner="nw"]{left:-6px;top:-6px;cursor:nwse-resize}#cropBox [data-corner="ne"]{right:-6px;top:-6px;cursor:nesw-resize}
+#cropBox [data-corner="sw"]{left:-6px;bottom:-6px;cursor:nesw-resize}#cropBox [data-corner="se"]{right:-6px;bottom:-6px;cursor:nwse-resize}
+.crop-fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.crop-preview{display:flex;align-items:center;gap:16px;margin:10px 0;font-size:13px;color:#566372}
+#cropResult{display:block;max-width:300px;max-height:120px;background:#111;border-radius:4px}
+.crop-help{font-size:12px;color:#697583;line-height:1.6}

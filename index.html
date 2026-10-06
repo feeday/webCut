@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>webCut V0.6.4</title>
-  <link rel="stylesheet" href="./style.css?v=064-asr-20261006" />
+  <link rel="stylesheet" href="./style.css?v=064-crop-20261006" />
 </head>
 <body>
   <header class="topbar">
@@ -17,6 +17,7 @@
       <button id="addVideoBtn">+ 视频</button>
       <button id="addImageBtn">+ 图像</button>
       <button id="addAudioBtn">+ 音频</button>
+      <button id="cropVideoBtn">画面裁剪</button>
       <button id="asrBtn" class="accent">Qwen ASR</button>
       <button id="exportBtn" class="accent">导出</button>
     </div>
@@ -102,12 +103,23 @@
   </form></dialog>
   <input id="subtitleInput" type="file" accept=".srt,.vtt,text/vtt,application/x-subrip" hidden />
 
+  <dialog id="cropDialog"><form method="dialog" class="dialog-box wide">
+    <div class="dialog-head"><h3>画面裁剪 · 当前视频片段</h3><button value="cancel">×</button></div>
+    <p>在画面上拖动绘制保留区域；拖框内移动，拖四角调整。可填写像素坐标。</p>
+    <div id="cropSurface" hidden><canvas id="cropCanvas"></canvas><div id="cropBox"><i data-corner="nw"></i><i data-corner="ne"></i><i data-corner="sw"></i><i data-corner="se"></i></div></div>
+    <div class="crop-fields"><label>左 X<input id="cropx" type="number" min="0" step="2"></label><label>上 Y<input id="cropy" type="number" min="0" step="2"></label><label>宽<input id="cropwidth" type="number" min="2" step="2"></label><label>高<input id="cropheight" type="number" min="2" step="2"></label></div>
+    <div class="crop-preview"><span>裁剪结果预览</span><canvas id="cropResult" hidden></canvas></div>
+    <p id="cropStatus" role="status"></p>
+    <p class="crop-help">只影响当前视频片段，可撤销。应用后导出视频即保留框内画面；导出默认采用首段裁剪尺寸。主剪辑窗口仍显示原始画面。像素自动对齐到偶数。</p>
+    <div class="dialog-actions"><button id="resetCropBtn" type="button">恢复完整画面</button><button value="cancel">取消</button><button id="applyCropBtn" type="button" class="accent">应用裁剪</button></div>
+  </form></dialog>
+
   <dialog id="exportDialog"><form method="dialog" class="dialog-box">
     <div class="dialog-head"><h3>导出</h3><button value="cancel">×</button></div>
     <label>类型<select id="exportType"><option value="video">视频</option><option value="audio">仅音频</option></select></label>
     <label>格式<select id="exportFormat"><option value="original">保持原格式</option><option>mp4</option><option>webm</option><option>mp3</option><option>wav</option><option>flac</option><option>m4a</option></select></label>
     <div id="exportVideoOptions">
-      <label>画布<select id="canvasPreset"><option value="source">首段视频尺寸</option><option value="1080p">1920×1080</option><option value="portrait">1080×1920</option><option value="custom">自定义</option></select></label>
+      <label>画布<select id="canvasPreset"><option value="source">首段视频 / 裁剪尺寸</option><option value="1080p">1920×1080</option><option value="portrait">1080×1920</option><option value="custom">自定义</option></select></label>
       <div class="grid2"><label>宽<input id="canvasWidth" type="number" value="1920"></label><label>高<input id="canvasHeight" type="number" value="1080"></label></div>
       <label>画面适配<select id="fitMode"><option value="contain">完整显示（黑边）</option><option value="cover">铺满画布（裁切）</option></select></label>
     </div>
@@ -119,14 +131,16 @@
   <input id="imageInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp" multiple hidden />
   <input id="audioInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg" multiple hidden />
 
-  <script src="./file-protocol-guard.js?v=064-asr-20261006" defer></script>
-  <script src="./desktop-save.js?v=064-asr-20261006" defer></script>
-  <script>(()=>{const NativeWorker=window.Worker;if(!NativeWorker||location.protocol==='file:')return;window.Worker=class WebCutWorker extends NativeWorker{constructor(url,options){let target=url;try{const s=String(url);if(s.startsWith('blob:')&&options?.type==='module')target=new URL('./ffmpeg-worker.js?v=064-asr-20261006',location.href).href;}catch{}super(target,options);}};})();</script>
+  <script src="./file-protocol-guard.js?v=064-crop-20261006" defer></script>
+  <script src="./desktop-save.js?v=064-crop-20261006" defer></script>
+  <script>(()=>{const NativeWorker=window.Worker;if(!NativeWorker||location.protocol==='file:')return;window.Worker=class WebCutWorker extends NativeWorker{constructor(url,options){let target=url;try{const s=String(url);if(s.startsWith('blob:')&&options?.type==='module')target=new URL('./ffmpeg-worker.js?v=064-crop-20261006',location.href).href;}catch{}super(target,options);}};})();</script>
   <script src="./subtitle-tools.js?v=20261006-network" defer></script>
   <script src="./qwen-transport.js?v=20261006-network" defer></script>
   <script src="./subtitles.js?v=20261006-network" defer></script>
-  <script src="./app-v064-loader.js?v=064-asr-20261006" defer></script>
-  <script src="./image-layers-v063.js?v=064-asr-20261006" defer></script>
-  <script src="./image-controls-v064.js?v=064-asr-20261006" defer></script>
+  <script src="./crop-tools.js?v=20261006-crop" defer></script>
+  <script src="./video-crop.js?v=20261006-crop" defer></script>
+  <script src="./app-v064-loader.js?v=064-crop-20261006" defer></script>
+  <script src="./image-layers-v063.js?v=064-crop-20261006" defer></script>
+  <script src="./image-controls-v064.js?v=064-crop-20261006" defer></script>
 </body>
 </html>
