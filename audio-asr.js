@@ -1,0 +1,15 @@
+(() => {
+'use strict';const $=id=>document.getElementById(id),util=window.WebCutSubtitles;let busy=false,controller,cues=[];
+const status=text=>$('asrStatus').textContent=text;
+function cancel(){if(busy){controller?.abort();status('已取消，原有识别结果保留。');}}
+$('asrBtn').onclick=()=>$('asrDialog').showModal();$('cancelAsr').onclick=cancel;$('asrDialog').addEventListener('close',cancel);window.addEventListener('audio:changed',cancel);window.addEventListener('pagehide',cancel);
+function render(){const container=$('cues');container.replaceChildren();for(const cue of cues){const row=document.createElement('div');row.className='cue-row';const jump=document.createElement('button');jump.type='button';jump.textContent=`${cue.start.toFixed(3)} – ${cue.end.toFixed(3)} 秒`;jump.onclick=()=>window.WebCutAudio.seek(cue.start);const field=document.createElement('textarea');field.rows=2;field.value=cue.text;field.setAttribute('aria-label',`字幕 ${cue.start.toFixed(3)} 秒的文字`);field.oninput=()=>cue.text=field.value;row.append(jump,field);container.append(row);}for(const id of ['saveTxt','saveSrt','saveVtt'])$(id).disabled=!cues.length;}
+$('runAsr').onclick=async()=>{
+if(busy)return;const token=$('asrToken').value.trim(),chunkSeconds=Number($('asrChunkSeconds').value);if(token&&!token.startsWith('hf_'))return status('需要 Hugging Face 的 hf_… Token，不是阿里云 sk-… Key。');if(!Number.isFinite(chunkSeconds)||chunkSeconds<2||chunkSeconds>30)return status('每段秒数需要在 2–30 之间');
+let snapshot;try{snapshot=window.WebCutAudio.snapshot($('asrScope').value);}catch(e){return status(e.message);}
+busy=true;controller=new AbortController();const signal=controller.signal;$('runAsr').disabled=true;$('cancelAsr').disabled=false;window.WebCutAudio.stop();const settings={context:$('asrContext').value,language:$('asrLanguage').value,enable_itn:$('asrItn').checked};
+try{status('正在连接 Qwen/Qwen3-ASR-Demo…');const transport=await window.WebCutQwen.create({token,signal,direct:$('asrTransport').value==='direct'});const next=await window.AudioASR.recognize({snapshot,chunkSeconds,transport,signal,settings,encode:window.AudioDSP.wav,onProgress:({index,count,start,end})=>status(`正在识别 ${index}/${count} 段 · ${transport.label} · ${start.toFixed(1)}–${end.toFixed(1)} 秒，请等待 Space 排队…`)});if(signal.aborted)throw new DOMException('已取消','AbortError');if(snapshot.revision!==window.WebCutAudio.revision())throw Error('音频已更换，请重新识别');cues=util.validate(next);render();status(`识别完成：${cues.length} 段，可在页面下方修改文字并导出。时间为分段估算，请校对。`);
+}catch(e){let message=String(e.message||e);if(token)message=message.split(token).join('[Token]');status(signal.aborted?'已取消，原有识别结果保留。':`识别失败：${message.slice(0,500)}。原有结果保留。`);}finally{busy=false;controller=null;$('runAsr').disabled=false;$('cancelAsr').disabled=true;}
+};
+for(const [id,format] of [['saveTxt','txt'],['saveSrt','srt'],['saveVtt','vtt']])$(id).onclick=async()=>{try{const valid=util.validate(cues),text=format==='txt'?valid.map(c=>c.text).join('\n'):util.serialize(valid,format);await window.__webCutDownloadBlob(new Blob([text],{type:'text/plain;charset=utf-8'}),`webCut-audio.${format}`);}catch(e){$('status').textContent=`识别结果导出失败：${e.message}`;}};
+})();
