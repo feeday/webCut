@@ -1,0 +1,2 @@
+importScripts('./audio-dsp.js');
+self.onmessage=({data:{samples,rate,n,id}})=>{try{const frames=Math.min(700,Math.max(1,Math.ceil(samples.length/(n/4)))),bins=n/2,db=new Float32Array(frames*bins),mel=new Float32Array(frames*64);for(let x=0;x<frames;x++){const start=Math.round(x*Math.max(0,samples.length-n)/Math.max(1,frames-1)),s=AudioDSP.spectrum(samples,start,n);db.set(s,x*bins);mel.set(AudioDSP.mel(s,rate,n),x*64);}self.postMessage({id,frames,bins,db,mel},[db.buffer,mel.buffer]);}catch(e){self.postMessage({id,error:e.message});}};

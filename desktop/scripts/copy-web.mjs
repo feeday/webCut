@@ -9,6 +9,11 @@ const outDir = resolve(desktopDir, 'web');
 
 const files = [
   'index.html',
+  'audio.html',
+  'audio.css',
+  'audio-dsp.js',
+  'audio-analysis-worker.js',
+  'audio-workbench.js',
   'topbar.js',
   'style.css',
   'app-v062.js',
