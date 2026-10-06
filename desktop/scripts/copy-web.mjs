@@ -12,6 +12,8 @@ const files = [
   'style.css',
   'app-v062.js',
   'app-v064-loader.js',
+  'subtitle-tools.js',
+  'subtitles.js',
   'image-layers-v063.js',
   'image-controls-v064.js',
   'ffmpeg-worker.js',

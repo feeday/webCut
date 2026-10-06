@@ -18,8 +18,8 @@
 - 时间轴缩放、Ctrl + 滚轮缩放
 - 逐帧查看
 - 故事板 / 按间隔抽帧导览
-- Qwen ASR 自定义 API
-- 字幕与 SRT 导出
+- Qwen3-ASR-Demo 一键字幕识别（Hugging Face Token）及自定义 API
+- SRT / VTT 字幕导入、导出、预览和双击编辑
 - 浏览器本地 FFmpeg.wasm 导出
 - 多种画布尺寸与 contain / cover 适配
 - Windows 网页版 / CentOS 网页版 / Windows EXE 桌面版
@@ -174,6 +174,8 @@ app-v062.js                核心编辑逻辑
 app-v064-loader.js         V0.6.4 启动与状态桥接
 image-layers-v063.js       多图片时间轴图层显示
 image-controls-v064.js     图片拖动 / 缩放 / 图层顺序控制
+subtitle-tools.js          字幕解析、导出与 WAV 分段
+subtitles.js               字幕界面与 Qwen Space 接入
 desktop-save.js            桌面版另存为 / 分块保存支持
 ffmpeg-worker.js           FFmpeg Worker 入口
 file-protocol-guard.js     file:// 模式保护
@@ -184,15 +186,37 @@ desktop/                   Tauri Windows 桌面版
 .github/workflows/         GitHub Actions 自动打包
 ```
 
-## Qwen ASR
+## Qwen ASR 与字幕
 
-默认使用 `multipart/form-data`，字段名默认 `file`。可配置：
+1. 打开视频或音频，完成时间轴剪辑。
+2. 点击顶部 **Qwen ASR**，默认服务为 `Qwen/Qwen3-ASR-Demo`，不需要填写接口地址。
+3. Key 填写 **Hugging Face Token（`hf_…`）**；公共 Space 可以尝试留空。Token 可在 <https://huggingface.co/settings/tokens> 创建。这不是阿里云百炼的 `sk-…` Key。
+4. 选择语言，可填写人名、术语等上下文，并选择是否规范化数字。
+5. 点击 **开始识别**。网页先在本机按时间轴提取裁剪、混合后的 16 kHz 单声道 WAV，再分段上传至该 Space。
+6. 完成后在字幕轨双击字幕块，修改文字、开始时间和结束时间。右侧可导入或导出 **SRT / VTT**。
 
-- API 地址
-- Bearer Token
-- 文件字段名
+**时间精度：**该 Space 的 `/asr_inference` 只返回文字和语言，不返回逐字或逐句时间戳。此版本默认每 8 秒识别一次，每段生成一条字幕；时间是分段估算，分段边界也可能截断语音，需要人工校对。每段时长可设为 2–30 秒。自定义 API 若提供 `segments` / `chunks` / `words`，会使用其时间戳（单位：秒）。
 
-ASR 服务需允许网页跨域访问（CORS）。
+**Key 与服务限制：**Key 只保存在当前页面内存中，刷新后重新填写。保存设置不会保存 Key，并会移除旧版设置里持久化的 Token。公共 Demo 的上游阿里云 Key 由 Space 管理者配置，填写个人 HF Token 不会替换它，也不保证绕过服务额度、排队、停机或网络限制。服务失败、取消或识别期间工程发生变化时，不会覆盖当前字幕。关闭识别窗口会取消任务；已经上传的音频无法撤回。单段识别超过 3 分钟会终止等待。
+
+字幕导入要求 UTF-8 编码，支持 SRT / WebVTT 多行文字；文件最大 5 MB，导入时替换现有字幕。无效时间或空文字会报错，不会部分覆盖；替换、编辑、删除均可撤销。VTT 的样式、布局设置不会保留。字幕会叠加在本地预览中，**视频导出暂不烧录字幕**，请单独导出 SRT / VTT。
+
+### 自定义 API
+
+选择“自定义 ASR API”，填写 API 地址、Bearer Token 和文件字段名（默认 `file`）。请求为 `multipart/form-data`，接口需允许网页跨域访问（CORS）。返回示例：
+
+```json
+{"segments":[{"start":0.5,"end":2.4,"text":"你好，世界"}]}
+```
+
+也接受 `{"text":"完整识别文本"}`，这种响应会生成覆盖整个音频的一条字幕。HF 模式通过 Gradio JavaScript 客户端直接连接 <https://huggingface.co/spaces/Qwen/Qwen3-ASR-Demo>，网页版和 EXE 共用相同代码，服务器无需安装 ASR 模型。
+
+### 开发验证
+
+```bash
+node --test tests/subtitles.test.cjs
+node desktop/scripts/copy-web.mjs
+```
 
 ## FFmpeg.wasm
 

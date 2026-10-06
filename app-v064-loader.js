@@ -3,7 +3,7 @@
 
   async function boot() {
     try {
-      const res = await fetch('./app-v062.js?v=064-20260912', { cache: 'no-store' });
+      const res = await fetch('./app-v062.js?v=064-asr-20261006', { cache: 'no-store' });
       if (!res.ok) throw new Error(`app-v062.js ${res.status}`);
       let src = await res.text();
 
@@ -25,7 +25,7 @@
       const pos = src.lastIndexOf(endNeedle);
       if (pos < 0) throw new Error('Cannot locate webCut bootstrap end');
 
-      const expose = `\nwindow.__webCutApi={renderAll,renderTimeline,renderInspector,syncPreview,assetById,findClip,selectedClip,projectDuration,seekTo};\n`;
+      const expose = `\nwindow.__webCutApi={renderAll,renderTimeline,renderInspector,syncPreview,assetById,findClip,selectedClip,projectDuration,seekTo,snapshot,renderTimelineAudioWav,downloadBlob,stopPlayback};\n`;
       src = src.slice(0, pos) + expose + src.slice(pos);
 
       (0, eval)(src);
