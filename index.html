@@ -83,6 +83,8 @@
     <label>Key / Token<input id="asrToken" type="password" autocomplete="off" placeholder="hf_…（公共 Space 可尝试留空）" /></label>
     <label id="asrFieldLabel">文件字段名<input id="asrField" value="file" /></label>
     <div id="asrHfOptions">
+      <label>连接方式<select id="asrTransport"><option value="auto">自动（Python / EXE 转发优先）</option><option value="direct">浏览器直连 Space</option></select></label>
+      <p class="subtitle-note">转发可避免浏览器跨域限制；运行电脑或服务器仍需能访问 <a href="https://qwen-qwen3-asr-demo.hf.space" target="_blank" rel="noopener noreferrer">Qwen Space</a>。Key 不会解决网络不通。</p>
       <label>语言<select id="asrLanguage"><option value="auto">自动识别</option><option value="zh">中文</option><option value="en">英语</option><option value="ja">日语</option><option value="ko">韩语</option><option value="es">西班牙语</option><option value="fr">法语</option><option value="de">德语</option><option value="ar">阿拉伯语</option><option value="it">意大利语</option><option value="ru">俄语</option><option value="pt">葡萄牙语</option></select></label>
       <label>识别上下文 / 专有名词<textarea id="asrContext" rows="2" placeholder="可选，用于帮助识别人名、术语"></textarea></label>
       <label>每段秒数<input id="asrChunkSeconds" type="number" min="2" max="30" value="8" /></label>
@@ -120,8 +122,9 @@
   <script src="./file-protocol-guard.js?v=064-asr-20261006" defer></script>
   <script src="./desktop-save.js?v=064-asr-20261006" defer></script>
   <script>(()=>{const NativeWorker=window.Worker;if(!NativeWorker||location.protocol==='file:')return;window.Worker=class WebCutWorker extends NativeWorker{constructor(url,options){let target=url;try{const s=String(url);if(s.startsWith('blob:')&&options?.type==='module')target=new URL('./ffmpeg-worker.js?v=064-asr-20261006',location.href).href;}catch{}super(target,options);}};})();</script>
-  <script src="./subtitle-tools.js?v=20261006" defer></script>
-  <script src="./subtitles.js?v=20261006" defer></script>
+  <script src="./subtitle-tools.js?v=20261006-network" defer></script>
+  <script src="./qwen-transport.js?v=20261006-network" defer></script>
+  <script src="./subtitles.js?v=20261006-network" defer></script>
   <script src="./app-v064-loader.js?v=064-asr-20261006" defer></script>
   <script src="./image-layers-v063.js?v=064-asr-20261006" defer></script>
   <script src="./image-controls-v064.js?v=064-asr-20261006" defer></script>

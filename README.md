@@ -2,7 +2,7 @@
 
 ![webCut 界面](https://raw.githubusercontent.com/feeday/webCut/main/2.png)
 
-轻量浏览器音视频剪辑器。网页服务器只负责提供 HTML / CSS / JS；视频、音频、图片的预览、剪辑和 FFmpeg.wasm 导出主要在访问者浏览器本地完成。只有使用 Qwen ASR 时，浏览器提取的 WAV 会发送到用户配置的 ASR API。
+轻量浏览器音视频剪辑器。网页服务器提供 HTML / CSS / JS 和固定目标的 Qwen Space 转发；视频、音频、图片的预览、剪辑和 FFmpeg.wasm 导出主要在访问者浏览器本地完成。只有使用 Qwen ASR 时，浏览器提取的 WAV 会通过所选连接方式发送到 ASR 服务。
 
 源码：<https://github.com/feeday/webCut>
 
@@ -201,6 +201,26 @@ desktop/                   Tauri Windows 桌面版
 
 字幕导入要求 UTF-8 编码，支持 SRT / WebVTT 多行文字；文件最大 5 MB，导入时替换现有字幕。无效时间或空文字会报错，不会部分覆盖；替换、编辑、删除均可撤销。VTT 的样式、布局设置不会保留。字幕会叠加在本地预览中，**视频导出暂不烧录字幕**，请单独导出 SRT / VTT。
 
+### “Failed to fetch” 网络修复
+
+更新**整个项目**并重启 `启动-webCut.bat` / `server.py`，浏览器按 `Ctrl+F5`。连接方式默认选择“自动”：
+
+- Python 启动版：浏览器通过同源 `/api/qwen` 请求，由 Python 转发至固定的 Qwen Space，避免浏览器跨域限制。
+- 重新构建的 EXE：使用原生网络转发，避免 WebView 跨域限制。旧 EXE 不会自动包含修复，需重新打包。
+- 纯静态托管：直接请求 `https://qwen-qwen3-asr-demo.hf.space/gradio_api`，不再依赖 `esm.sh/@gradio/client` 或主站 Space 查询。仍受浏览器跨域、网络和 Space 状态限制。
+- 若服务器不能访问 Space，但浏览器所在电脑可以，可手动选择“浏览器直连 Space”。
+
+运行 Python / EXE 的电脑或服务器必须能访问上述 `hf.space` 域名。Token 不能解决网络不通。Python 转发读取系统 / 环境代理；EXE 转发支持 `HTTP_PROXY` / `HTTPS_PROXY` 环境变量。需要代理时，使用自己的实际地址，在启动程序之前设置。例如 Windows CMD：
+
+```bat
+set HTTPS_PROXY=http://127.0.0.1:你的代理端口
+python server.py
+```
+
+远程服务器转发时，提取后的分段音频和 Key 会经过该服务器，请使用自己信任的实例及 HTTPS（本机回环地址除外）。转发仅支持固定 Space 的上传、提交和取回结果接口，不接受任意目标网址、不记录 Key 或音频。取消会停止浏览器等待；已发出的上游请求可能继续执行。
+
+错误现在会显示失败阶段。如果提示“音频提取 / FFmpeg 资源加载”，需检查 `esm.sh` / `unpkg.com` 网络，该阶段尚未调用 ASR；如果显示 HTTP 401 / 403，再检查 Token 权限；HTTP 429 为限流；HTTP 502 可能是转发端无法访问 Space。
+
 ### 自定义 API
 
 选择“自定义 ASR API”，填写 API 地址、Bearer Token 和文件字段名（默认 `file`）。请求为 `multipart/form-data`，接口需允许网页跨域访问（CORS）。返回示例：
@@ -209,12 +229,13 @@ desktop/                   Tauri Windows 桌面版
 {"segments":[{"start":0.5,"end":2.4,"text":"你好，世界"}]}
 ```
 
-也接受 `{"text":"完整识别文本"}`，这种响应会生成覆盖整个音频的一条字幕。HF 模式通过 Gradio JavaScript 客户端直接连接 <https://huggingface.co/spaces/Qwen/Qwen3-ASR-Demo>，网页版和 EXE 共用相同代码，服务器无需安装 ASR 模型。
+也接受 `{"text":"完整识别文本"}`，这种响应会生成覆盖整个音频的一条字幕。HF 模式通过 Gradio HTTP API 连接 <https://huggingface.co/spaces/Qwen/Qwen3-ASR-Demo>，无需在线加载 Gradio JavaScript 客户端或访问 Hugging Face 主站解析地址；服务器无需安装 ASR 模型。
 
 ### 开发验证
 
 ```bash
-node --test tests/subtitles.test.cjs
+node --test tests/*.test.cjs
+python -m unittest discover -s tests -p "test_*.py"
 node desktop/scripts/copy-web.mjs
 ```
 

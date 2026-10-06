@@ -3,7 +3,7 @@
   function init() {
     const state = window.__webCutState, api = window.__webCutApi, util = window.WebCutSubtitles;
     const $ = id => document.getElementById(id);
-    let busy = false, cancelled = false, activeJob, controller, editing;
+    let busy = false, cancelled = false, controller, editing;
     const fingerprint = () => JSON.stringify([state.videos, state.audios, state.images, state.subtitles]);
     const status = text => { $('asrStatus').textContent = text; };
     const preview = document.createElement('div');
@@ -78,48 +78,11 @@
     function cancel() {
       if (!busy) return;
       cancelled = true; controller?.abort();
-      if (activeJob) Promise.resolve(activeJob.cancel()).catch(() => {});
       status('已取消；等待当前音频处理结束，现有字幕保持不变。');
     }
     $('cancelAsrBtn').onclick = cancel;
     $('asrDialog').addEventListener('close', cancel);
     function check() { if (cancelled) throw new Error('识别已取消'); }
-    async function connect(Client, token) {
-      let timer, onAbort, abandoned = false;
-      const connecting = Client.connect('Qwen/Qwen3-ASR-Demo', token ? { hf_token: token } : {});
-      connecting.then(client => { if (abandoned) client.close(); }, () => {});
-      try {
-        return await Promise.race([connecting, new Promise((_, reject) => {
-          timer = setTimeout(() => reject(new Error('连接 Space 超时，请检查网络或稍后重试')), 60000);
-          onAbort = () => reject(new Error('识别已取消'));
-          controller.signal.addEventListener('abort', onAbort, { once: true });
-          if (controller.signal.aborted) onAbort();
-        })]);
-      } catch (error) { abandoned = true; throw error; }
-      finally { clearTimeout(timer); controller?.signal.removeEventListener('abort', onAbort); }
-    }
-    async function predict(client, payload) {
-      activeJob = client.submit('/asr_inference', payload);
-      // Also bound stalled queues; never overwrite the project on timeout.
-      let timer, onAbort;
-      try {
-        return await Promise.race([(async () => {
-          let result;
-          for await (const event of activeJob) {
-            check();
-            if (event.type === 'data') result = event.data;
-            if (event.type === 'status' && event.stage === 'error') throw new Error(event.message || 'Space 识别失败');
-          }
-          check(); return util.hfText(result);
-        })(), new Promise((_, reject) => { timer = setTimeout(() => {
-          Promise.resolve(activeJob?.cancel()).catch(() => {});
-          reject(new Error('Space 排队或识别超时（3 分钟），请稍后重试'));
-        }, 180000); }), new Promise((_, reject) => {
-          onAbort = () => reject(new Error('识别已取消'));
-          controller.signal.addEventListener('abort', onAbort, { once: true });
-        })]);
-      } finally { clearTimeout(timer); controller?.signal.removeEventListener('abort', onAbort); activeJob = null; }
-    }
     $('runAsrBtn').onclick = async () => {
       if (busy) return;
       if (!state.videos.length && !state.audios.length) return status('请先打开视频或音频');
@@ -140,25 +103,28 @@
       // Avoid a second FFmpeg job while extracting the timeline.
       const controls = ['exportBtn', 'runExportBtn', 'openVideoBtn', 'addVideoBtn', 'addAudioBtn', 'addImageBtn'];
       const disabled = controls.map(id => $(id).disabled); controls.forEach(id => { $(id).disabled = true; });
-      let client;
+
+      let stage = '音频提取 / FFmpeg 资源加载';
       try {
         status('正在按时间轴裁剪、混合并提取音频…');
         await state.waveformQueue; check();
         const wavBlob = await api.renderTimelineAudioWav(); check();
         let cues;
         if (hf) {
+          stage = 'Qwen Space 连接';
           status('正在连接 Qwen/Qwen3-ASR-Demo…');
-          const { Client, handle_file } = await import('https://esm.sh/@gradio/client@1.19.0'); check();
-          client = await connect(Client, token); check();
+          const transport = await window.WebCutQwen.create({ token, signal: controller.signal, direct: $('asrTransport').value === 'direct' }); check();
           const wav = util.pcmWav(await wavBlob.arrayBuffer()); cues = [];
           const count = Math.ceil(wav.duration / chunkSeconds);
           for (let i = 0; i < count; i++) {
             check(); const start = i * chunkSeconds, end = Math.min(wav.duration, start + chunkSeconds);
-            status(`正在识别 ${i + 1}/${count} 段（${start.toFixed(1)}–${end.toFixed(1)} 秒），请等待 Space 排队…`);
-            const text = await predict(client, { audio_file: handle_file(util.chunk(wav, start, end)), context, language, enable_itn: itn });
+            status(`正在识别 ${i + 1}/${count} 段 · ${transport.label}（${start.toFixed(1)}–${end.toFixed(1)} 秒），请等待 Space 排队…`);
+            stage = `第 ${i + 1}/${count} 段识别（${transport.label}）`;
+            const text = await transport.recognize(util.chunk(wav, start, end), { context, language, enable_itn: itn });
             if (text) cues.push({ start, end, text });
           }
         } else {
+          stage = '自定义 API 请求';
           const fd = new FormData(); fd.append(field, wavBlob, 'webcut_timeline.wav');
           const timer = setTimeout(() => controller.abort(), 180000);
           try {
@@ -178,10 +144,11 @@
         status(`识别完成：${cues.length} 条字幕。${hf ? '时间为分段估算，双击字幕块校对后导出 SRT / VTT。' : '可双击字幕块修改并导出。'}`);
       } catch (e) {
         let message = String(e?.message || e);
+        if (stage.startsWith('音频提取') && /fetch|network|load failed/i.test(message)) message = 'FFmpeg 资源加载失败，请检查 esm.sh / unpkg.com 是否可访问；尚未向 Qwen 上传音频';
         if (token) message = message.split(token).join('[Key]');
-        status(cancelled ? '已取消，现有字幕保持不变。' : `识别失败：${message.slice(0, 400)}。现有字幕保持不变。请检查网络、Token 权限或 Space 状态。`);
+        status(cancelled ? '已取消，现有字幕保持不变。' : `识别失败【${stage}】：${message.slice(0, 500)}。现有字幕保持不变。请检查网络、Token 权限或 Space 状态。`);
       } finally {
-        client?.close(); controller = null; busy = false; $('runAsrBtn').disabled = false; $('cancelAsrBtn').disabled = true;
+        controller = null; busy = false; $('runAsrBtn').disabled = false; $('cancelAsrBtn').disabled = true;
         controls.forEach((id, i) => { $(id).disabled = disabled[i]; });
       }
     };

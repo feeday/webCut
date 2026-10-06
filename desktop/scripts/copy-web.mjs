@@ -12,6 +12,7 @@ const files = [
   'style.css',
   'app-v062.js',
   'app-v064-loader.js',
+  'qwen-transport.js',
   'subtitle-tools.js',
   'subtitles.js',
   'image-layers-v063.js',

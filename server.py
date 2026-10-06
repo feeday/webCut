@@ -3,6 +3,11 @@ from __future__ import annotations
 import argparse
 import errno
 import http.server
+import json
+import re
+import urllib.error
+import urllib.parse
+import urllib.request
 import os
 import socketserver
 import threading
@@ -14,9 +19,97 @@ ROOT = Path(__file__).resolve().parent
 DEFAULT_PORT = 18080
 
 
+QWEN_ORIGIN = "https://qwen-qwen3-asr-demo.hf.space"
+MAX_ASR_BODY = 2 * 1024 * 1024
+ASR_SLOTS = threading.BoundedSemaphore(4)
+
+
+def allowed_qwen_path(path: str, method: str) -> bool:
+    if method == "POST":
+        return path in {"/upload", "/call/asr_inference"}
+    return method == "GET" and re.fullmatch(r"/call/asr_inference/[A-Za-z0-9_-]{1,128}", path) is not None
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None  # Never forward the user's token to a different destination.
+
+
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
+
+    def send_json(self, code, payload):
+        data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
+    def do_GET(self):
+        if self.path == "/api/qwen/status":
+            self.send_json(200, {"webcut_qwen_proxy": True})
+        elif self.path.startswith("/api/qwen/"):
+            self.proxy_qwen()
+        else:
+            super().do_GET()
+
+    def do_POST(self):
+        if self.path.startswith("/api/qwen/"):
+            self.proxy_qwen()
+        else:
+            self.send_error(404)
+
+    def proxy_qwen(self):
+        path = self.path.removeprefix("/api/qwen")
+        if not allowed_qwen_path(path, self.command):
+            return self.send_json(404, {"error": "Unsupported Qwen endpoint"})
+        # Same-origin only; no permissive CORS headers and no arbitrary target URLs.
+        origin = self.headers.get("Origin")
+        if self.headers.get("X-WebCut-ASR") != "1" or (origin and urllib.parse.urlsplit(origin).netloc != self.headers.get("Host")):
+            return self.send_json(403, {"error": "Same-origin requests only"})
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            return self.send_json(400, {"error": "Invalid content length"})
+        if length < 0 or length > MAX_ASR_BODY:
+            return self.send_json(413, {"error": "Audio chunk too large"})
+        if not ASR_SLOTS.acquire(blocking=False):
+            return self.send_json(429, {"error": "Too many active ASR requests"})
+        try:
+            self.connection.settimeout(190)
+            body = self.rfile.read(length) if self.command == "POST" else None
+            if body is not None and len(body) != length:
+                return self.send_json(400, {"error": "Incomplete request"})
+            headers = {"User-Agent": "webCut/0.6.4"}
+            if self.headers.get("Content-Type"):
+                headers["Content-Type"] = self.headers["Content-Type"]
+            auth = self.headers.get("Authorization", "")
+            if auth:
+                if not re.fullmatch(r"Bearer hf_[A-Za-z0-9_]+", auth):
+                    return self.send_json(400, {"error": "Invalid HF token format"})
+                headers["Authorization"] = auth
+            request = urllib.request.Request(QWEN_ORIGIN + "/gradio_api" + path, data=body, headers=headers, method=self.command)
+            # Honors standard HTTP(S)_PROXY settings on the running computer/server.
+            with urllib.request.build_opener(NoRedirect()).open(request, timeout=180) as response:
+                data = response.read(MAX_ASR_BODY + 1)
+                if len(data) > MAX_ASR_BODY:
+                    return self.send_json(502, {"error": "Upstream response too large"})
+                self.send_response(response.status)
+                self.send_header("Content-Type", response.headers.get("Content-Type", "application/json"))
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+        except urllib.error.HTTPError as exc:
+            self.send_json(exc.code if 400 <= exc.code <= 599 else 502, {"error": "Qwen Space rejected the request"})
+        except (TimeoutError, urllib.error.URLError):
+            self.send_json(502, {"error": "Cannot connect to Qwen Space; check server network/proxy"})
+        except (ConnectionError, OSError):
+            # The client may have cancelled; never log audio or Authorization.
+            pass
+        finally:
+            ASR_SLOTS.release()
 
     def end_headers(self):
         self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
@@ -95,7 +188,7 @@ def main() -> int:
     else:
         print(f"Open   : {local_url}")
     print()
-    print("The web server only serves HTML/CSS/JS.")
+    print("The web server serves the editor and a fixed Qwen Space relay.")
     print("Media editing/export runs in the visitor's browser.")
     print("Only Qwen ASR sends extracted audio to the configured ASR API.")
     print("Press Ctrl+C to stop.")
