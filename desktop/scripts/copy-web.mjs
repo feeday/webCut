@@ -17,6 +17,8 @@ const files = [
   'qwen-transport.js',
   'subtitle-tools.js',
   'subtitles.js',
+  'subtitle-renderer.js',
+  'subtitle-style.js',
   'image-layers-v063.js',
   'image-controls-v064.js',
   'ffmpeg-worker.js',

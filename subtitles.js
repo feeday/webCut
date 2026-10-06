@@ -6,12 +6,6 @@
     let busy = false, cancelled = false, controller, editing;
     const fingerprint = () => JSON.stringify([state.videos, state.audios, state.images, state.subtitles]);
     const status = text => { $('asrStatus').textContent = text; };
-    const preview = document.createElement('div');
-    preview.className = 'subtitle-preview'; $('stage').appendChild(preview);
-    window.__webCutSubtitlePreview = t => {
-      preview.textContent = state.subtitles.filter(s => t >= s.start && t < s.end).map(s => s.text).join('\n');
-      preview.hidden = !preview.textContent;
-    };
     function refresh() { api.renderAll(); }
     function edit(cue) {
       editing = cue; $('subtitleStart').value = cue.start.toFixed(3); $('subtitleEnd').value = cue.end.toFixed(3);
