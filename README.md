@@ -1,5 +1,7 @@
 # webCut V0.6.4
 
+文档更新：2026-10-06。以下功能以 `main` 分支最新源码为准，旧安装包可能尚未包含。
+
 ![webCut 界面](https://raw.githubusercontent.com/feeday/webCut/main/2.png)
 
 轻量浏览器音视频剪辑器。网页服务器提供 HTML / CSS / JS 和固定目标的 Qwen Space 转发；视频、音频、图片的预览、剪辑和 FFmpeg.wasm 导出主要在访问者浏览器本地完成。只有使用 Qwen ASR 时，浏览器提取的 WAV 会通过所选连接方式发送到 ASR 服务。
@@ -27,6 +29,21 @@
 - Windows 网页版 / CentOS 网页版 / Windows EXE 桌面版
 - Windows EXE 支持“另存为”选择导出路径
 - Windows 免安装 Portable EXE，双击直接运行
+
+## 快速使用
+
+1. 启动网页版本或最新构建的 EXE，点击 **打开视频/音频** 导入素材。
+2. 在时间轴中选择片段，完成时长裁剪、分割或拼接。
+3. 需要裁掉画面边缘时，点击 **画面裁剪**，拖框选择要保留的区域，再点 **应用裁剪**。
+4. 点击 **Qwen ASR** 生成字幕，或通过右侧 **导入字幕** 导入 UTF-8 的 SRT / VTT。双击字幕块可修改文字和起止时间。
+5. 点击 **字幕样式** 设置字体、大小、颜色和位置。将播放头移到有字幕的时刻查看效果。
+6. 点击 **导出**，确认画布尺寸和格式。勾选 **烧录字幕到视频** 会把字幕永久写进画面；取消勾选则导出无字幕画面。SRT / VTT 可另行导出。
+
+## 更新已有项目
+
+- 网页版：更新完整源码后重启 `启动-webCut.bat` / `server.py`，浏览器按 **Ctrl+F5** 强制刷新。不要只替换 `index.html`，新增脚本也必须同步。
+- EXE 版：到 GitHub Actions 选择 `main` 重新运行 **Build Windows EXE**，使用新生成的文件。更新网页源码不会自动更新旧 EXE。
+- 本次新增：Qwen Space 转发、SRT / VTT 导入导出、字幕编辑、视频框选裁剪、字幕样式设置，以及视频字幕烧录。
 
 ## Windows 网页版
 
@@ -174,17 +191,23 @@ index.html                 网页主页面
 style.css                  页面样式
 app-v062.js                核心编辑逻辑
 app-v064-loader.js         V0.6.4 启动与状态桥接
+crop-tools.js              裁剪坐标、尺寸校验与 FFmpeg 裁剪参数
+video-crop.js              视频框选、调整及裁剪结果预览
 image-layers-v063.js       多图片时间轴图层显示
 image-controls-v064.js     图片拖动 / 缩放 / 图层顺序控制
 subtitle-tools.js          字幕解析、导出与 WAV 分段
-subtitles.js               字幕界面与 Qwen Space 接入
+subtitles.js               字幕编辑、导入导出与识别界面
+qwen-transport.js          Qwen Space 直连 / Python / EXE 转发
+subtitle-renderer.js       字幕排版、字体绘制与烧录时间序列
+subtitle-style.js          字幕样式设置与画面预览
 desktop-save.js            桌面版另存为 / 分块保存支持
 ffmpeg-worker.js           FFmpeg Worker 入口
 file-protocol-guard.js     file:// 模式保护
-server.py                  Windows / Linux 静态服务器
+server.py                  Windows / Linux 网页服务器与 Qwen 转发
 启动-webCut.bat            Windows 网页版启动脚本
 start-centos.sh            CentOS / Linux 启动脚本
 desktop/                   Tauri Windows 桌面版
+tests/                     字幕、裁剪及网络转发测试
 .github/workflows/         GitHub Actions 自动打包
 ```
 
@@ -283,6 +306,3 @@ node desktop/scripts/copy-web.mjs
 - `Delete`：删除选中片段
 - `Ctrl + 鼠标滚轮`：缩放时间轴
 
-## Source
-
-Source code: <https://github.com/feeday/webCut>
