@@ -9,6 +9,7 @@ const outDir = resolve(desktopDir, 'web');
 
 const files = [
   'index.html',
+  'topbar.js',
   'style.css',
   'app-v062.js',
   'app-v064-loader.js',

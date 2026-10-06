@@ -7,20 +7,26 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>webCut V0.6.4</title>
-  <link rel="stylesheet" href="./style.css?v=064-style-20261006" />
+  <link rel="stylesheet" href="./style.css?v=064-menu-20261006" />
 </head>
 <body>
   <header class="topbar">
     <div class="brand">webCut <small style="font-size:11px;font-weight:500;color:#84909c;margin-left:6px">V0.6.4</small></div>
     <div class="top-actions">
-      <button id="openVideoBtn">打开视频/音频</button>
-      <button id="addVideoBtn">+ 视频</button>
-      <button id="addImageBtn">+ 图像</button>
-      <button id="addAudioBtn">+ 音频</button>
+      <details id="importMenu" class="import-menu">
+        <summary>导入素材 <span aria-hidden="true">▾</span></summary>
+        <div class="import-menu-panel">
+          <button id="openVideoBtn" type="button">打开视频 / 音频（新工程）</button>
+          <button id="addVideoBtn" type="button">追加视频</button>
+          <button id="addImageBtn" type="button">添加图片</button>
+          <button id="addAudioBtn" type="button">追加音频</button>
+        </div>
+      </details>
       <button id="cropVideoBtn">画面裁剪</button>
       <button id="subtitleStyleBtn">字幕样式</button>
       <button id="asrBtn" class="accent">Qwen ASR</button>
       <button id="exportBtn" class="accent">导出</button>
+      <a class="project-home-btn" href="https://github.com/feeday/webCut" target="_blank" rel="noopener noreferrer" title="打开 GitHub 项目首页">GitHub 项目 ↗</a>
     </div>
   </header>
 
@@ -145,6 +151,7 @@
   <input id="imageInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp" multiple hidden />
   <input id="audioInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg" multiple hidden />
 
+  <script src="./topbar.js?v=20261006-menu" defer></script>
   <script src="./file-protocol-guard.js?v=064-style-20261006" defer></script>
   <script src="./desktop-save.js?v=064-style-20261006" defer></script>
   <script>(()=>{const NativeWorker=window.Worker;if(!NativeWorker||location.protocol==='file:')return;window.Worker=class WebCutWorker extends NativeWorker{constructor(url,options){let target=url;try{const s=String(url);if(s.startsWith('blob:')&&options?.type==='module')target=new URL('./ffmpeg-worker.js?v=064-style-20261006',location.href).href;}catch{}super(target,options);}};})();</script>

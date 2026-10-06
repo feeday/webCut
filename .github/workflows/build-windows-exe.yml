@@ -50,6 +50,7 @@ jobs:
         run: |
           $files = @(
             'index.html',
+            'topbar.js',
             'style.css',
             'app-v062.js',
             'app-v064-loader.js',
