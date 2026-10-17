@@ -25,6 +25,7 @@
       <button id="cropVideoBtn">画面裁剪</button>
       <button id="subtitleStyleBtn">字幕样式</button>
       <button id="exportBtn" class="accent">导出</button>
+      <a class="project-home-btn" href="https://huggingface.co/spaces/Qwen/Qwen3-ASR-Demo" target="_blank" rel="noopener noreferrer">语音识别 ↗</a>
       <a class="project-home-btn" href="https://github.com/feeday/webCut" target="_blank" rel="noopener noreferrer" title="打开 GitHub 项目首页">GitHub 项目 ↗</a>
     </div>
   </header>
@@ -139,8 +140,8 @@
 
   <dialog id="exportDialog"><form method="dialog" class="dialog-box">
     <div class="dialog-head"><h3>导出</h3><button value="cancel">×</button></div>
-    <label>类型<select id="exportType"><option value="video">视频</option><option value="audio">仅音频</option></select></label>
-    <label>格式<select id="exportFormat"><option value="original">保持原格式</option><option>mp4</option><option>webm</option><option>mp3</option><option>wav</option><option>flac</option><option>m4a</option></select></label>
+    <label>类型<select id="exportType"><option value="video">视频</option><option value="audio">仅音频</option><option value="image">图像</option></select></label>
+    <label>格式<select id="exportFormat"><option value="original">保持原格式</option><option>mp4</option><option>webm</option><option>mp3</option><option>wav</option><option>flac</option><option>m4a</option><option value="png">PNG</option><option value="jpeg">JPEG</option><option value="webp">WebP</option><option value="bmp">BMP</option></select></label>
     <div id="exportVideoOptions">
       <label><input id="burnSubtitles" type="checkbox" checked> 烧录字幕到视频（使用字幕样式，永久写入画面）</label>
       <label>画布<select id="canvasPreset"><option value="source">首段视频 / 裁剪尺寸</option><option value="1080p">1920×1080</option><option value="portrait">1080×1920</option><option value="custom">自定义</option></select></label>
@@ -169,5 +170,6 @@
   <script src="./app-v064-loader.js?v=064-style-20261006" defer></script>
   <script src="./image-layers-v063.js?v=064-style-20261006" defer></script>
   <script src="./image-controls-v064.js?v=064-style-20261006" defer></script>
+  <script src="./image-export-addon.js?v=20261018" defer></script>
 </body>
 </html>
