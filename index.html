@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>webCut V0.6.4</title>
-  <link rel="stylesheet" href="./style.css?v=064-menu-20261006" />
+  <link rel="stylesheet" href="./style.css?v=20261018-ad-inside-preview" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1964437526797765" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -37,9 +37,9 @@
         <video id="previewVideo" playsinline></video>
         <div id="overlayLayer" class="overlay-layer"></div>
         <div id="emptyPreview" class="empty-preview">打开视频 / 音频开始剪辑</div>
-      </div>
-      <div class="webcut-ad" style="width:100%;max-width:1200px;min-height:180px;margin:10px auto;display:flex;justify-content:center;align-items:flex-start;overflow:visible;">
-        <ins class="adsbygoogle" style="display:block;width:100%;min-height:180px" data-ad-client="ca-pub-1964437526797765" data-ad-slot="1907914008" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <div class="webcut-ad" id="webcutEmptyAd" aria-label="广告">
+          <ins class="adsbygoogle" style="display:block;width:100%;height:100%" data-ad-client="ca-pub-1964437526797765" data-ad-slot="1907914008" data-ad-format="horizontal" data-full-width-responsive="true"></ins>
+        </div>
       </div>
       <div class="transport">
         <button id="prevFrameBtn">◀ 帧</button><button id="playBtn">▶</button><button id="nextFrameBtn">帧 ▶</button>
@@ -155,7 +155,7 @@
   <input id="imageInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp" multiple hidden />
   <input id="audioInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.flac,.aac,.opus,.ogg" multiple hidden />
 
-  <script src="./ads-init.js?v=20261018" defer></script>
+  <script src="./ads-init.js?v=20261018-ad-inside-preview" defer></script>
   <script src="./topbar.js?v=20261006-menu" defer></script>
   <script src="./file-protocol-guard.js?v=064-style-20261006" defer></script>
   <script src="./desktop-save.js?v=064-style-20261006" defer></script>
