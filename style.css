@@ -49,3 +49,10 @@ dialog{border:none;border-radius:12px;padding:0;box-shadow:0 25px 70px #0003;max
 .import-menu-panel button{text-align:left;border:0;width:100%;border-radius:6px;padding:10px 12px}
 .import-menu-panel button:disabled{color:#a0a8b2;cursor:not-allowed}
 @media(max-width:780px){.topbar{padding:0 8px;gap:8px}.top-actions{gap:4px}.top-actions>button,.project-home-btn,.import-menu summary{padding:7px 8px;font-size:12px}.brand{font-size:15px}.import-menu-panel{min-width:220px}}
+
+/* Empty-project advertising stays inside the preview stage; never creates a third grid row. */
+.webcut-ad{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:calc(100% - 20px);max-width:1200px;height:min(160px,55%);display:flex;justify-content:center;align-items:stretch;z-index:4}
+.webcut-ad .adsbygoogle{width:100%;height:100%}
+body:not(.webcut-has-media) .preview-wrap:has(.webcut-ad:not([hidden])) .empty-preview{top:18%;transform:translateY(-50%)}
+body.webcut-has-media .webcut-ad,body:has(#timelineInner .tl-clip) .webcut-ad,.webcut-ad[hidden]{display:none!important}
+@media(max-width:900px){.webcut-ad{height:min(110px,40%)}body:not(.webcut-has-media) .preview-wrap:has(.webcut-ad:not([hidden])) .empty-preview{top:23%}}
