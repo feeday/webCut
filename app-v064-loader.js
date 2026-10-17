@@ -10,6 +10,9 @@
       const stateNeedle = 'const state={';
       if (!src.includes(stateNeedle)) throw new Error('Cannot locate webCut state declaration');
       src = src.replace(stateNeedle, 'const state=window.__webCutState={');
+      src = src.replace("els.addImageBtn.onclick=()=>{if(!state.videos.length){alert('图像覆盖需要先有视频');return;}els.imageInput.value='';els.imageInput.click();};", "els.addImageBtn.onclick=()=>{els.imageInput.value='';els.imageInput.click();};");
+      src = src.replace("if(!state.videos.length&&!state.audios.length){alert('请先打开视频或音频');return;}","if(!state.videos.length&&!state.audios.length&&!state.images.length){alert('请先添加素材');return;}");
+      src = src.replace("els.exportType.value=state.videos.length?'video':'audio'", "els.exportType.value=state.videos.length?'video':state.images.length?'image':'audio'");
 
       const downloadNeedle = "function downloadBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);}";
       if (src.includes(downloadNeedle)) {
