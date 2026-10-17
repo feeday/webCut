@@ -13,7 +13,6 @@
   <header class="topbar">
     <div class="brand">webCut <small style="font-size:11px;font-weight:500;color:#84909c;margin-left:6px">V0.6.4</small></div>
     <div class="top-actions">
-      <a class="project-home-btn" href="./audio.html" target="_blank" rel="noopener noreferrer">纯音频工作台</a>
       <details id="importMenu" class="import-menu">
         <summary>导入素材 <span aria-hidden="true">▾</span></summary>
         <div class="import-menu-panel">
@@ -25,7 +24,6 @@
       </details>
       <button id="cropVideoBtn">画面裁剪</button>
       <button id="subtitleStyleBtn">字幕样式</button>
-      <button id="asrBtn" class="accent">Qwen ASR</button>
       <button id="exportBtn" class="accent">导出</button>
       <a class="project-home-btn" href="https://github.com/feeday/webCut" target="_blank" rel="noopener noreferrer" title="打开 GitHub 项目首页">GitHub 项目 ↗</a>
     </div>
@@ -37,6 +35,11 @@
         <video id="previewVideo" playsinline></video>
         <div id="overlayLayer" class="overlay-layer"></div>
         <div id="emptyPreview" class="empty-preview">打开视频 / 音频开始剪辑</div>
+      </div>
+      <div class="webcut-ad" style="text-align:center;margin:10px auto;max-width:100%;overflow:hidden;min-height:90px;">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1964437526797765" crossorigin="anonymous"></script>
+        <ins class="adsbygoogle" style="display:block;width:100%;max-width:1200px;height:180px;margin:0 auto" data-ad-client="ca-pub-1964437526797765" data-ad-slot="1907914008"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
       </div>
       <div class="transport">
         <button id="prevFrameBtn">◀ 帧</button><button id="playBtn">▶</button><button id="nextFrameBtn">帧 ▶</button>
