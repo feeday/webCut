@@ -3,6 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    // 手机访问时跳转到移动端页面；平板和电脑仍使用 webCut。
+    (() => {
+      const ua = navigator.userAgent || '';
+      const isPhone = navigator.userAgentData?.mobile === true ||
+        /iPhone|iPod|Windows Phone|IEMobile|BlackBerry|BB10|webOS|Opera Mini|Android.*Mobile/i.test(ua);
+      if (isPhone) {
+        window.location.replace('https://cpuck.com/wxm/');
+      }
+    })();
+  </script>
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
